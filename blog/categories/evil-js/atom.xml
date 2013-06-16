@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Evil-JS | j201's Meanderings]]></title>
+  <link href="http://j201.github.io/blog/categories/evil-js/atom.xml" rel="self"/>
+  <link href="http://j201.github.io/"/>
+  <updated>2013-06-16T19:28:29-04:00</updated>
+  <id>http://j201.github.io/</id>
+  <author>
+    <name><![CDATA[j201]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Evil JS: Macros]]></title>
+    <link href="http://j201.github.io/blog/2013/06/16/evil-js-macros/"/>
+    <updated>2013-06-16T14:37:00-04:00</updated>
+    <id>http://j201.github.io/blog/2013/06/16/evil-js-macros</id>
+    <content type="html"><![CDATA[<p><em>Note: Don&rsquo;t try this at work. This is bad code that shouldn&rsquo;t be used in production.</em></p>
+
+<p>As every JS hacker knows, <code>eval</code> is evil. It&rsquo;s slow, insecure, and generally unnecessary. The same goes for the <code>Function</code> constructor, which can, but shouldn&rsquo;t be used to create functions using strings to specify the arguments and body. But the badness of <code>eval</code> and <code>Function</code> doesn&rsquo;t mean you can&rsquo;t have some fun with them.</p>
+
+<p><code>Function.prototype.toString</code> is a function that returns the source code of the function it&rsquo;s called from. For example,
+``` javascript
+var add = function(x, y) {</p>
+
+<pre><code>return x + y;
+</code></pre>
+
+<p>};</p>
+
+<p>add.toString();
+/*
+&ldquo;function (x, y) {</p>
+
+<pre><code>return x + y;
+</code></pre>
+
+<p>}&ldquo;
+*/
+```
+This is a feature that is mostly used in debugging, but you&rsquo;ll note that since we can get the function as a string, we can modify it and pass it to the Function constructor. This allows us to implement a feature JS has been sorely lacking, C-style macros!</p>
+
+<h3>Simple Replacements</h3>
+
+<p>So the first thing to implement is simple replacements, like #defines without arguments. Let&rsquo;s use an object to represent these definitions:
+``` javascript
+var defines = {</p>
+
+<pre><code>PI : '3.14159',
+E : '2.71828',
+GREETING : '"Hello, "'
+</code></pre>
+
+<p>};
+```</p>
+
+<p>And now we can implement the first version of the JS preprocesser (let&rsquo;s call it the JSPP). It takes a definition object and a function and returns another function with the macro expansion applied:
+``` javascript
+function getBody(fn) { // Gets the body of a function as a string</p>
+
+<pre><code>fnStr = fn.toString();
+return fnStr.slice(fnStr.indexOf('{') + 1, fnStr.lastIndexOf('}'));
+</code></pre>
+
+<p>};</p>
+
+<p>function getArgs(fn) { // Gets the arguments of a function as an array of strings</p>
+
+<pre><code>fnStr = fn.toString();
+return fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).split(',').map(function(x) { return x.trim(); });
+</code></pre>
+
+<p>}</p>
+
+<p>function JSPP(defines, fn) {</p>
+
+<pre><code>var args = getArgs(fn);
+
+// Do the replacements
+var body = Object.keys(defines)
+    .reduce(function (text, replacement) {
+        // Uses a RegExp to ensure that the macro name has non-word characters on either side
+        // Note that macro names should only use \w characters
+        return text.replace(RegExp('(\\W+)' + key + '(\\W+)', 'g'), '$1' + defines[key] + '$2');
+    }, getBody(fn));
+
+// Use the function constructor to rebuild the function
+return Function.apply(null, args.concat(body));
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Example usage:
+``` javascript
+var defines = {</p>
+
+<pre><code>PI : '3.14159',
+E : '2.71828',
+GREETING : '"Hello, "'
+</code></pre>
+
+<p>};</p>
+
+<p>var doStuff = JSPP(defines, function(val) {</p>
+
+<pre><code>return typeof val === 'number' ? PI + E * val : GREETING + val;
+</code></pre>
+
+<p>});</p>
+
+<p>doStuff(2) // 8.57815
+doStuff(&lsquo;Bob&rsquo;) // Hello, Bob
+doStuff.toString() // function anonymous(val) { return typeof val === &lsquo;number&rsquo; ? 3.14159 + 2.71828 * val : &ldquo;Hello, &rdquo; + val; }
+```</p>
+
+<h3>Function-like Macros</h3>
+
+<p>Okay, let&rsquo;s go one level deeper: macro arguments. We&rsquo;ll use the same syntax as the <code>Function</code> constructor, argument strings followed by body, except in an array:
+``` javascript
+var defines = {</p>
+
+<pre><code>ABS : ['x', '((x)&lt;0?-(x):(x))']
+</code></pre>
+
+<p>};
+```</p>
+
+<p>And the new (buggy) JSPP implementation:
+``` javascript
+function getBody(fn) { // Gets the body of a function as a string</p>
+
+<pre><code>fnStr = fn.toString();
+return fnStr.slice(fnStr.indexOf('{') + 1, fnStr.lastIndexOf('}'));
+</code></pre>
+
+<p>};</p>
+
+<p>function getArgs(fn) { // Gets the arguments of a function as an array of strings</p>
+
+<pre><code>fnStr = fn.toString();
+return fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).split(',').map(function(x) { return x.trim(); });
+</code></pre>
+
+<p>}</p>
+
+<p>function JSPP(defines, fn) {</p>
+
+<pre><code>var args = getArgs(fn);
+
+// Do the replacements
+var body = Object.keys(defines)
+    .reduce(function (text, key) {
+        if (typeof defines[key] === 'string') { // Do a simple replacement
+            return text.replace(RegExp('(\\W+)' + key + '(\\W+)', 'g'), '$1' + defines[key] + '$2');
+        } else { // Do a replacement with arguments
+            // First, convert the arguments into regex replacement patterns, such as $1 or $23
+            var macroBody = defines[key][defines[key].length - 1];
+            var macroArgs = defines[key].slice(0, -1);
+            var replacement = macroArgs.reduce(function(text, arg, index) {
+                return text.replace(RegExp(arg, 'g'), '$' + (index + 1));
+            }, macroBody);
+            // Now, use RegExp capturing to apply the replacement
+            // Note that macro names can't have regex metacharacters, macro arguments cannot have commas
+            // and will often fail if they have ending parens, and there must be at least one argument.
+            // This is a messy, bad, but easy way of doing the replacement,
+            // which fits with the theme of the post, I feel.
+            return text.replace(RegExp(key + // The macro name
+                                       '\\s*\\(\\s*(.+?)' + // The initial paren and first argument
+                                       Array(macroArgs.length).join('\\s*,\\s*(.+?)') + // The other args, separated by commas
+                                       '\\s*\\)', // The final paren
+                                       'g'), replacement);
+        }
+    }, getBody(fn));
+// Use the function constructor to rebuild the function
+return Function.apply(null, args.concat(body));
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Example usage:
+``` javascript
+var defines = {</p>
+
+<pre><code>PI : '3.14159',
+E : '2.71828',
+ABS : ['x', '((x)&lt;0?-(x):(x))'],
+RESISTORS_PARALLEL : ['a', 'b', '((a)*(b)/((a)+(b)))']
+</code></pre>
+
+<p>};</p>
+
+<p>var doStuff = JSPP(defines, function(val) {</p>
+
+<pre><code>return RESISTORS_PARALLEL(PI, E) * ABS(val);
+</code></pre>
+
+<p>});</p>
+
+<p>doStuff(2) // 2.9146452959536644
+doStuff(-2) // 2.9146452959536644
+doStuff.toString()
+/*
+function anonymous(val) {</p>
+
+<pre><code>return ((3.14159)*(2.71828)/((3.14159)+(2.71828))) * ((val)&lt;0?-(val):(val));
+</code></pre>
+
+<p>}
+*/
+```</p>
+
+<p>So there you go, everyone&rsquo;s favourite preprocesser partially ported to JavaScript! And while this is not a good use of <code>Function</code> and <code>Function.prototype.toString</code>, it does show their power. They both have legitimate purposes, and if you&rsquo;re not afraid to go down that road, you can do some pretty wacky stuff with them.</p>
+]]></content>
+  </entry>
+  
+</feed>
