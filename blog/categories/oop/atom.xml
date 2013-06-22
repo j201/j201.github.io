@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: OOP | j201's Meanderings]]></title>
+  <link href="http://j201.github.io/blog/categories/oop/atom.xml" rel="self"/>
+  <link href="http://j201.github.io/"/>
+  <updated>2013-06-22T11:35:53-04:00</updated>
+  <id>http://j201.github.io/</id>
+  <author>
+    <name><![CDATA[j201]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[JS Object Literal Inheritance]]></title>
+    <link href="http://j201.github.io/blog/2013/06/22/js-object-literal-inheritance/"/>
+    <updated>2013-06-22T10:50:00-04:00</updated>
+    <id>http://j201.github.io/blog/2013/06/22/js-object-literal-inheritance</id>
+    <content type="html"><![CDATA[<p>A JavaScript question that often pops up is &ldquo;How do I set the prototype of an object literal?&rdquo; The short answer is that right now, you can&rsquo;t. When ES6 standardizes the <code>__proto__</code> property, you&rsquo;ll be able to do so directly, but right now, there&rsquo;s no native language construct. The good news is that it is downright simple to make a helper function that will let you use object literals in inheritance:</p>
+
+<p>```javascript
+function inherit(proto, literal) {</p>
+
+<pre><code>var result = Object.create(proto);
+Object.keys(literal).forEach(function(key) {
+    result[key] = literal[key];
+});
+return result;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>You use it by calling it with the parent object as the first argument and the literal with the changes you want to make as the second: <code>var myObj = inherit(parent, {foo : 2, bar : 3});</code> Here are some more examples:</p>
+
+<p>```js
+var dog = {</p>
+
+<pre><code>mammal : true,
+domestic : true,
+weight : 50,
+speak : function() {
+    return "woof";
+}
+</code></pre>
+
+<p>};</p>
+
+<p>var littleDog = inherit(dog, {weight : 10});</p>
+
+<p>littleDog.speak(); // &ldquo;woof&rdquo;
+littleDog.weight; // 10</p>
+
+<p>var cat = inherit(dog, {</p>
+
+<pre><code>weight : 12,
+speak : function() {
+    return "meow";
+}
+</code></pre>
+
+<p>});</p>
+
+<p>cat.mammal; // true
+cat.speak(); // &ldquo;meow&rdquo;
+```</p>
+
+<p>So there you have it, an easy and useful construct for better differential inheritance. I&rsquo;m sure I&rsquo;m not the first person to use a function like this, and I bet you can find oodles of helper libraries that have something similar, but I think the ease with which you can make such an extension to JS&rsquo;s OOP model shows how awesome and flexible it is.</p>
+
+<h5>Notes:</h5>
+
+<ul>
+<li><code>inherit</code> requires ES5, or at least shims for <code>Object.create</code>, <code>Object.keys</code>, and <code>Array#forEach</code>. Here&rsquo;s a more complex ES3-compatible version:
+<code>js
+var inherit = function() {
+  function F(){}
+  return function(proto, literal) {
+      F.prototype = proto;
+      var result = new F();
+      for (var prop in literal) {
+          if (literal.hasOwnProperty(prop)) {
+              result[prop] = literal[prop];
+          }
+      }
+      return result;
+  };
+}();
+</code></li>
+<li><code>Object.create</code> does take a second parameter that works in the same way as <code>inherit</code>&rsquo;s, but it uses property descriptors rather than simple properties. So using it would look something like <code>var myObj = Object.create(parent, {foo : {configurable : true, writable : true, enumerable : true, value: 2}});</code>. A bit unwieldy.</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
