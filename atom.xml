@@ -4,7 +4,7 @@
   <title><![CDATA[j201's Meanderings]]></title>
   <link href="http://j201.github.io/atom.xml" rel="self"/>
   <link href="http://j201.github.io/"/>
-  <updated>2013-06-22T11:35:53-04:00</updated>
+  <updated>2013-06-22T11:44:34-04:00</updated>
   <id>http://j201.github.io/</id>
   <author>
     <name><![CDATA[j201]]></name>
@@ -128,6 +128,7 @@
 
 <ul>
 <li><code>Object.create</code> does take a second parameter that works in the same way as <code>inherit</code>&rsquo;s, but it uses property descriptors rather than simple properties. So using it would look something like <code>var myObj = Object.create(parent, {foo : {configurable : true, writable : true, enumerable : true, value: 2}});</code>. A bit unwieldy.</li>
+<li>Since <code>inherit</code> copies the properties over from the object passed as the second parameter, you can use an existing object to specify the differences and it won&rsquo;t be modified.</li>
 </ul>
 
 ]]></content>
