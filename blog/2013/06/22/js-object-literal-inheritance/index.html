@@ -119,17 +119,17 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">function</span> <span class="nx">inherit</span><span class="p">(</span><span class="nx">proto</span><span class="p">,</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">proto</span><span class="p">);</span>
-</span><span class='line'>  <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">literal</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">result</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">literal</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">proto</span><span class="p">,</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">proto</span><span class="p">);</span>
+</span><span class='line'>    <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">literal</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">result</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">literal</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>You use it by calling it with the parent object as the first argument and the literal with the changes you want to make as the second: <code>var myObj = inherit(parent, {foo : 2, bar : 3});</code> Here are some more examples:</p>
+<p>You use it by calling it with the parent object as the first argument and the literal with the changes you want to make as the second: <code>var myObj = extend(parent, {foo : 2, bar : 3});</code> Here are some more examples:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -154,29 +154,33 @@
 <span class='line-number'>21</span>
 <span class='line-number'>22</span>
 <span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
 </pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">dog</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">mammal</span> <span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">domestic</span> <span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">weight</span> <span class="o">:</span> <span class="mi">50</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">speak</span> <span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="s2">&quot;woof&quot;</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>    <span class="nx">mammal</span> <span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">domestic</span> <span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">weight</span> <span class="o">:</span> <span class="mi">50</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">speak</span> <span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s2">&quot;woof&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">littleDog</span> <span class="o">=</span> <span class="nx">inherit</span><span class="p">(</span><span class="nx">dog</span><span class="p">,</span> <span class="p">{</span><span class="nx">weight</span> <span class="o">:</span> <span class="mi">10</span><span class="p">});</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">littleDog</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">dog</span><span class="p">,</span> <span class="p">{</span><span class="nx">weight</span> <span class="o">:</span> <span class="mi">10</span><span class="p">});</span>
 </span><span class='line'>
 </span><span class='line'><span class="nx">littleDog</span><span class="p">.</span><span class="nx">speak</span><span class="p">();</span> <span class="c1">// &quot;woof&quot;</span>
 </span><span class='line'><span class="nx">littleDog</span><span class="p">.</span><span class="nx">weight</span><span class="p">;</span> <span class="c1">// 10</span>
 </span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="nx">inherit</span><span class="p">(</span><span class="nx">dog</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">weight</span> <span class="o">:</span> <span class="mi">12</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">speak</span> <span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="s2">&quot;meow&quot;</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">dog</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">weight</span> <span class="o">:</span> <span class="mi">12</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">speak</span> <span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s2">&quot;meow&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="nx">breed</span> <span class="o">:</span> <span class="s2">&quot;siamese&quot;</span>
 </span><span class='line'><span class="p">});</span>
 </span><span class='line'>
 </span><span class='line'><span class="nx">cat</span><span class="p">.</span><span class="nx">mammal</span><span class="p">;</span> <span class="c1">// true</span>
 </span><span class='line'><span class="nx">cat</span><span class="p">.</span><span class="nx">speak</span><span class="p">();</span> <span class="c1">// &quot;meow&quot;</span>
+</span><span class='line'><span class="nx">cat</span><span class="p">.</span><span class="nx">breed</span><span class="p">;</span> <span class="c1">// &quot;siamese&quot;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -185,7 +189,7 @@
 <h5>Notes:</h5>
 
 <ul>
-<li><code>inherit</code> requires ES5, or at least shims for <code>Object.create</code>, <code>Object.keys</code>, and <code>Array#forEach</code>. Here&rsquo;s a more complex ES3-compatible version:</li>
+<li><code>extend</code> requires ES5, or at least shims for <code>Object.create</code>, <code>Object.keys</code>, and <code>Array#forEach</code>. Here&rsquo;s a more complex ES3-compatible version:</li>
 </ul>
 
 
@@ -202,25 +206,25 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">inherit</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">function</span> <span class="nx">F</span><span class="p">(){}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">proto</span><span class="p">,</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">F</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">proto</span><span class="p">;</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">F</span><span class="p">();</span>
-</span><span class='line'>      <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">prop</span> <span class="k">in</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="k">if</span> <span class="p">(</span><span class="nx">literal</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">prop</span><span class="p">))</span> <span class="p">{</span>
-</span><span class='line'>              <span class="nx">result</span><span class="p">[</span><span class="nx">prop</span><span class="p">]</span> <span class="o">=</span> <span class="nx">literal</span><span class="p">[</span><span class="nx">prop</span><span class="p">];</span>
-</span><span class='line'>          <span class="p">}</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">};</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">extend</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">function</span> <span class="nx">F</span><span class="p">(){}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">proto</span><span class="p">,</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">F</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">proto</span><span class="p">;</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">F</span><span class="p">();</span>
+</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">prop</span> <span class="k">in</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">literal</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">prop</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">result</span><span class="p">[</span><span class="nx">prop</span><span class="p">]</span> <span class="o">=</span> <span class="nx">literal</span><span class="p">[</span><span class="nx">prop</span><span class="p">];</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">};</span>
 </span><span class='line'><span class="p">}();</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <ul>
-<li><code>Object.create</code> does take a second parameter that works in the same way as <code>inherit</code>&rsquo;s, but it uses property descriptors rather than simple properties. So using it would look something like <code>var myObj = Object.create(parent, {foo : {configurable : true, writable : true, enumerable : true, value: 2}});</code>. A bit unwieldy.</li>
-<li>Since <code>inherit</code> copies the properties over from the object passed as the second parameter, you can use an existing object to specify the differences and it won&rsquo;t be modified.</li>
+<li><code>Object.create</code> does take a second parameter that works in the same way as <code>extend</code>&rsquo;s, but it uses property descriptors rather than simple properties. So using it would look something like <code>var myObj = Object.create(parent, {foo : {configurable : true, writable : true, enumerable : true, value: 2}});</code>. A bit unwieldy.</li>
+<li>Since <code>extend</code> copies the properties over from the object passed as the second parameter, you can use an existing object to specify the differences and it won&rsquo;t be modified.</li>
 </ul>
 
 </div>

@@ -122,17 +122,17 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">function</span> <span class="nx">inherit</span><span class="p">(</span><span class="nx">proto</span><span class="p">,</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">proto</span><span class="p">);</span>
-</span><span class='line'>  <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">literal</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">result</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">literal</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span>
-</span><span class='line'>  <span class="p">});</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">proto</span><span class="p">,</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span><span class="nx">proto</span><span class="p">);</span>
+</span><span class='line'>    <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">literal</span><span class="p">).</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">result</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">=</span> <span class="nx">literal</span><span class="p">[</span><span class="nx">key</span><span class="p">];</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>You use it by calling it with the parent object as the first argument and the literal with the changes you want to make as the second: <code>var myObj = inherit(parent, {foo : 2, bar : 3});</code> Here are some more examples:</p>
+<p>You use it by calling it with the parent object as the first argument and the literal with the changes you want to make as the second: <code>var myObj = extend(parent, {foo : 2, bar : 3});</code> Here are some more examples:</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -157,29 +157,33 @@
 <span class='line-number'>21</span>
 <span class='line-number'>22</span>
 <span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
 </pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">dog</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">mammal</span> <span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">domestic</span> <span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">weight</span> <span class="o">:</span> <span class="mi">50</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">speak</span> <span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="s2">&quot;woof&quot;</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>    <span class="nx">mammal</span> <span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">domestic</span> <span class="o">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">weight</span> <span class="o">:</span> <span class="mi">50</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">speak</span> <span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s2">&quot;woof&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">littleDog</span> <span class="o">=</span> <span class="nx">inherit</span><span class="p">(</span><span class="nx">dog</span><span class="p">,</span> <span class="p">{</span><span class="nx">weight</span> <span class="o">:</span> <span class="mi">10</span><span class="p">});</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">littleDog</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">dog</span><span class="p">,</span> <span class="p">{</span><span class="nx">weight</span> <span class="o">:</span> <span class="mi">10</span><span class="p">});</span>
 </span><span class='line'>
 </span><span class='line'><span class="nx">littleDog</span><span class="p">.</span><span class="nx">speak</span><span class="p">();</span> <span class="c1">// &quot;woof&quot;</span>
 </span><span class='line'><span class="nx">littleDog</span><span class="p">.</span><span class="nx">weight</span><span class="p">;</span> <span class="c1">// 10</span>
 </span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="nx">inherit</span><span class="p">(</span><span class="nx">dog</span><span class="p">,</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">weight</span> <span class="o">:</span> <span class="mi">12</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">speak</span> <span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="s2">&quot;meow&quot;</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">cat</span> <span class="o">=</span> <span class="nx">extend</span><span class="p">(</span><span class="nx">dog</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">weight</span> <span class="o">:</span> <span class="mi">12</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">speak</span> <span class="o">:</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="s2">&quot;meow&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="nx">breed</span> <span class="o">:</span> <span class="s2">&quot;siamese&quot;</span>
 </span><span class='line'><span class="p">});</span>
 </span><span class='line'>
 </span><span class='line'><span class="nx">cat</span><span class="p">.</span><span class="nx">mammal</span><span class="p">;</span> <span class="c1">// true</span>
 </span><span class='line'><span class="nx">cat</span><span class="p">.</span><span class="nx">speak</span><span class="p">();</span> <span class="c1">// &quot;meow&quot;</span>
+</span><span class='line'><span class="nx">cat</span><span class="p">.</span><span class="nx">breed</span><span class="p">;</span> <span class="c1">// &quot;siamese&quot;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -188,7 +192,7 @@
 <h5>Notes:</h5>
 
 <ul>
-<li><code>inherit</code> requires ES5, or at least shims for <code>Object.create</code>, <code>Object.keys</code>, and <code>Array#forEach</code>. Here&rsquo;s a more complex ES3-compatible version:</li>
+<li><code>extend</code> requires ES5, or at least shims for <code>Object.create</code>, <code>Object.keys</code>, and <code>Array#forEach</code>. Here&rsquo;s a more complex ES3-compatible version:</li>
 </ul>
 
 
@@ -205,25 +209,25 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">inherit</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">function</span> <span class="nx">F</span><span class="p">(){}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">proto</span><span class="p">,</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">F</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">proto</span><span class="p">;</span>
-</span><span class='line'>      <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">F</span><span class="p">();</span>
-</span><span class='line'>      <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">prop</span> <span class="k">in</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="k">if</span> <span class="p">(</span><span class="nx">literal</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">prop</span><span class="p">))</span> <span class="p">{</span>
-</span><span class='line'>              <span class="nx">result</span><span class="p">[</span><span class="nx">prop</span><span class="p">]</span> <span class="o">=</span> <span class="nx">literal</span><span class="p">[</span><span class="nx">prop</span><span class="p">];</span>
-</span><span class='line'>          <span class="p">}</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">};</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">extend</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">function</span> <span class="nx">F</span><span class="p">(){}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kd">function</span><span class="p">(</span><span class="nx">proto</span><span class="p">,</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">F</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="nx">proto</span><span class="p">;</span>
+</span><span class='line'>        <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">F</span><span class="p">();</span>
+</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">prop</span> <span class="k">in</span> <span class="nx">literal</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">literal</span><span class="p">.</span><span class="nx">hasOwnProperty</span><span class="p">(</span><span class="nx">prop</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>                <span class="nx">result</span><span class="p">[</span><span class="nx">prop</span><span class="p">]</span> <span class="o">=</span> <span class="nx">literal</span><span class="p">[</span><span class="nx">prop</span><span class="p">];</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">};</span>
 </span><span class='line'><span class="p">}();</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <ul>
-<li><code>Object.create</code> does take a second parameter that works in the same way as <code>inherit</code>&rsquo;s, but it uses property descriptors rather than simple properties. So using it would look something like <code>var myObj = Object.create(parent, {foo : {configurable : true, writable : true, enumerable : true, value: 2}});</code>. A bit unwieldy.</li>
-<li>Since <code>inherit</code> copies the properties over from the object passed as the second parameter, you can use an existing object to specify the differences and it won&rsquo;t be modified.</li>
+<li><code>Object.create</code> does take a second parameter that works in the same way as <code>extend</code>&rsquo;s, but it uses property descriptors rather than simple properties. So using it would look something like <code>var myObj = Object.create(parent, {foo : {configurable : true, writable : true, enumerable : true, value: 2}});</code>. A bit unwieldy.</li>
+<li>Since <code>extend</code> copies the properties over from the object passed as the second parameter, you can use an existing object to specify the differences and it won&rsquo;t be modified.</li>
 </ul>
 
 </div>
@@ -280,13 +284,13 @@
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">add</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">x</span> <span class="o">+</span> <span class="nx">y</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">x</span> <span class="o">+</span> <span class="nx">y</span><span class="p">;</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
 </span><span class='line'><span class="nx">add</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
 </span><span class='line'><span class="cm">/*</span>
 </span><span class='line'><span class="cm">&quot;function (x, y) {</span>
-</span><span class='line'><span class="cm"> return x + y;</span>
+</span><span class='line'><span class="cm">    return x + y;</span>
 </span><span class='line'><span class="cm">}&quot;</span>
 </span><span class='line'><span class="cm">*/</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -304,9 +308,9 @@
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">defines</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">PI</span> <span class="o">:</span> <span class="s1">&#39;3.14159&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">E</span> <span class="o">:</span> <span class="s1">&#39;2.71828&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">GREETING</span> <span class="o">:</span> <span class="s1">&#39;&quot;Hello, &quot;&#39;</span>
+</span><span class='line'>    <span class="nx">PI</span> <span class="o">:</span> <span class="s1">&#39;3.14159&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">E</span> <span class="o">:</span> <span class="s1">&#39;2.71828&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">GREETING</span> <span class="o">:</span> <span class="s1">&#39;&quot;Hello, &quot;&#39;</span>
 </span><span class='line'><span class="p">};</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -338,28 +342,28 @@
 <span class='line-number'>23</span>
 <span class='line-number'>24</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">function</span> <span class="nx">getBody</span><span class="p">(</span><span class="nx">fn</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Gets the body of a function as a string</span>
-</span><span class='line'>  <span class="nx">fnStr</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;{&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">lastIndexOf</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">));</span>
+</span><span class='line'>    <span class="nx">fnStr</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;{&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">lastIndexOf</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">));</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">function</span> <span class="nx">getArgs</span><span class="p">(</span><span class="nx">fn</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Gets the arguments of a function as an array of strings</span>
-</span><span class='line'>  <span class="nx">fnStr</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)).</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">).</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span> <span class="p">});</span>
+</span><span class='line'>    <span class="nx">fnStr</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)).</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">).</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span> <span class="p">});</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">function</span> <span class="nx">JSPP</span><span class="p">(</span><span class="nx">defines</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">getArgs</span><span class="p">(</span><span class="nx">fn</span><span class="p">);</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">getArgs</span><span class="p">(</span><span class="nx">fn</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="c1">// Do the replacements</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">body</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">defines</span><span class="p">)</span>
-</span><span class='line'>      <span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">text</span><span class="p">,</span> <span class="nx">replacement</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="c1">// Uses a RegExp to ensure that the macro name has non-word characters on either side</span>
-</span><span class='line'>          <span class="c1">// Note that macro names should only use \w characters</span>
-</span><span class='line'>          <span class="k">return</span> <span class="nx">text</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nb">RegExp</span><span class="p">(</span><span class="s1">&#39;(\\W+)&#39;</span> <span class="o">+</span> <span class="nx">key</span> <span class="o">+</span> <span class="s1">&#39;(\\W+)&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="s1">&#39;$1&#39;</span> <span class="o">+</span> <span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;$2&#39;</span><span class="p">);</span>
-</span><span class='line'>      <span class="p">},</span> <span class="nx">getBody</span><span class="p">(</span><span class="nx">fn</span><span class="p">));</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="c1">// Use the function constructor to rebuild the function</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nb">Function</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">args</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">body</span><span class="p">));</span>
+</span><span class='line'>    <span class="c1">// Do the replacements</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">body</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">defines</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">text</span><span class="p">,</span> <span class="nx">replacement</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="c1">// Uses a RegExp to ensure that the macro name has non-word characters on either side</span>
+</span><span class='line'>            <span class="c1">// Note that macro names should only use \w characters</span>
+</span><span class='line'>            <span class="k">return</span> <span class="nx">text</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nb">RegExp</span><span class="p">(</span><span class="s1">&#39;(\\W+)&#39;</span> <span class="o">+</span> <span class="nx">key</span> <span class="o">+</span> <span class="s1">&#39;(\\W+)&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="s1">&#39;$1&#39;</span> <span class="o">+</span> <span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;$2&#39;</span><span class="p">);</span>
+</span><span class='line'>        <span class="p">},</span> <span class="nx">getBody</span><span class="p">(</span><span class="nx">fn</span><span class="p">));</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Use the function constructor to rebuild the function</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nb">Function</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">args</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">body</span><span class="p">));</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -380,13 +384,13 @@
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">defines</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">PI</span> <span class="o">:</span> <span class="s1">&#39;3.14159&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">E</span> <span class="o">:</span> <span class="s1">&#39;2.71828&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">GREETING</span> <span class="o">:</span> <span class="s1">&#39;&quot;Hello, &quot;&#39;</span>
+</span><span class='line'>    <span class="nx">PI</span> <span class="o">:</span> <span class="s1">&#39;3.14159&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">E</span> <span class="o">:</span> <span class="s1">&#39;2.71828&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">GREETING</span> <span class="o">:</span> <span class="s1">&#39;&quot;Hello, &quot;&#39;</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">var</span> <span class="nx">doStuff</span> <span class="o">=</span> <span class="nx">JSPP</span><span class="p">(</span><span class="nx">defines</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="k">typeof</span> <span class="nx">val</span> <span class="o">===</span> <span class="s1">&#39;number&#39;</span> <span class="o">?</span> <span class="nx">PI</span> <span class="o">+</span> <span class="nx">E</span> <span class="o">*</span> <span class="nx">val</span> <span class="o">:</span> <span class="nx">GREETING</span> <span class="o">+</span> <span class="nx">val</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="k">typeof</span> <span class="nx">val</span> <span class="o">===</span> <span class="s1">&#39;number&#39;</span> <span class="o">?</span> <span class="nx">PI</span> <span class="o">+</span> <span class="nx">E</span> <span class="o">*</span> <span class="nx">val</span> <span class="o">:</span> <span class="nx">GREETING</span> <span class="o">+</span> <span class="nx">val</span><span class="p">;</span>
 </span><span class='line'><span class="p">});</span>
 </span><span class='line'>
 </span><span class='line'><span class="nx">doStuff</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1">// 8.57815</span>
@@ -403,7 +407,7 @@
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">defines</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">ABS</span> <span class="o">:</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;((x)&lt;0?-(x):(x))&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="nx">ABS</span> <span class="o">:</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;((x)&lt;0?-(x):(x))&#39;</span><span class="p">]</span>
 </span><span class='line'><span class="p">};</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -451,44 +455,44 @@
 <span class='line-number'>39</span>
 <span class='line-number'>40</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">function</span> <span class="nx">getBody</span><span class="p">(</span><span class="nx">fn</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Gets the body of a function as a string</span>
-</span><span class='line'>  <span class="nx">fnStr</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;{&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">lastIndexOf</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">));</span>
+</span><span class='line'>    <span class="nx">fnStr</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;{&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">lastIndexOf</span><span class="p">(</span><span class="s1">&#39;}&#39;</span><span class="p">));</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">function</span> <span class="nx">getArgs</span><span class="p">(</span><span class="nx">fn</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Gets the arguments of a function as an array of strings</span>
-</span><span class='line'>  <span class="nx">fnStr</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)).</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">).</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span> <span class="p">});</span>
+</span><span class='line'>    <span class="nx">fnStr</span> <span class="o">=</span> <span class="nx">fn</span><span class="p">.</span><span class="nx">toString</span><span class="p">();</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">fnStr</span><span class="p">.</span><span class="nx">indexOf</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">)).</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">).</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">.</span><span class="nx">trim</span><span class="p">();</span> <span class="p">});</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">function</span> <span class="nx">JSPP</span><span class="p">(</span><span class="nx">defines</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">getArgs</span><span class="p">(</span><span class="nx">fn</span><span class="p">);</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">args</span> <span class="o">=</span> <span class="nx">getArgs</span><span class="p">(</span><span class="nx">fn</span><span class="p">);</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="c1">// Do the replacements</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">body</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">defines</span><span class="p">)</span>
-</span><span class='line'>      <span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">text</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">===</span> <span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Do a simple replacement</span>
-</span><span class='line'>              <span class="k">return</span> <span class="nx">text</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nb">RegExp</span><span class="p">(</span><span class="s1">&#39;(\\W+)&#39;</span> <span class="o">+</span> <span class="nx">key</span> <span class="o">+</span> <span class="s1">&#39;(\\W+)&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="s1">&#39;$1&#39;</span> <span class="o">+</span> <span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;$2&#39;</span><span class="p">);</span>
-</span><span class='line'>          <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="c1">// Do a replacement with arguments</span>
-</span><span class='line'>              <span class="c1">// First, convert the arguments into regex replacement patterns, such as $1 or $23</span>
-</span><span class='line'>              <span class="kd">var</span> <span class="nx">macroBody</span> <span class="o">=</span> <span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">][</span><span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">].</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
-</span><span class='line'>              <span class="kd">var</span> <span class="nx">macroArgs</span> <span class="o">=</span> <span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">].</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
-</span><span class='line'>              <span class="kd">var</span> <span class="nx">replacement</span> <span class="o">=</span> <span class="nx">macroArgs</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">text</span><span class="p">,</span> <span class="nx">arg</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>                  <span class="k">return</span> <span class="nx">text</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nb">RegExp</span><span class="p">(</span><span class="nx">arg</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">));</span>
-</span><span class='line'>              <span class="p">},</span> <span class="nx">macroBody</span><span class="p">);</span>
-</span><span class='line'>              <span class="c1">// Now, use RegExp capturing to apply the replacement</span>
-</span><span class='line'>              <span class="c1">// Note that macro names can&#39;t have regex metacharacters, macro arguments cannot have commas</span>
-</span><span class='line'>              <span class="c1">// and will often fail if they have ending parens, and there must be at least one argument.</span>
-</span><span class='line'>              <span class="c1">// This is a messy, bad, but easy way of doing the replacement,</span>
-</span><span class='line'>              <span class="c1">// which fits with the theme of the post, I feel.</span>
-</span><span class='line'>              <span class="k">return</span> <span class="nx">text</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nb">RegExp</span><span class="p">(</span><span class="nx">key</span> <span class="o">+</span> <span class="c1">// The macro name</span>
-</span><span class='line'>                                         <span class="s1">&#39;\\s*\\(\\s*(.+?)&#39;</span> <span class="o">+</span> <span class="c1">// The initial paren and first argument</span>
-</span><span class='line'>                                         <span class="nb">Array</span><span class="p">(</span><span class="nx">macroArgs</span><span class="p">.</span><span class="nx">length</span><span class="p">).</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;\\s*,\\s*(.+?)&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="c1">// The other args, separated by commas</span>
-</span><span class='line'>                                         <span class="s1">&#39;\\s*\\)&#39;</span><span class="p">,</span> <span class="c1">// The final paren</span>
-</span><span class='line'>                                         <span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="nx">replacement</span><span class="p">);</span>
-</span><span class='line'>          <span class="p">}</span>
-</span><span class='line'>      <span class="p">},</span> <span class="nx">getBody</span><span class="p">(</span><span class="nx">fn</span><span class="p">));</span>
-</span><span class='line'>  <span class="c1">// Use the function constructor to rebuild the function</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nb">Function</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">args</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">body</span><span class="p">));</span>
+</span><span class='line'>    <span class="c1">// Do the replacements</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">body</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">keys</span><span class="p">(</span><span class="nx">defines</span><span class="p">)</span>
+</span><span class='line'>        <span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span> <span class="p">(</span><span class="nx">text</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="k">typeof</span> <span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">===</span> <span class="s1">&#39;string&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// Do a simple replacement</span>
+</span><span class='line'>                <span class="k">return</span> <span class="nx">text</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nb">RegExp</span><span class="p">(</span><span class="s1">&#39;(\\W+)&#39;</span> <span class="o">+</span> <span class="nx">key</span> <span class="o">+</span> <span class="s1">&#39;(\\W+)&#39;</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="s1">&#39;$1&#39;</span> <span class="o">+</span> <span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;$2&#39;</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span> <span class="k">else</span> <span class="p">{</span> <span class="c1">// Do a replacement with arguments</span>
+</span><span class='line'>                <span class="c1">// First, convert the arguments into regex replacement patterns, such as $1 or $23</span>
+</span><span class='line'>                <span class="kd">var</span> <span class="nx">macroBody</span> <span class="o">=</span> <span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">][</span><span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">].</span><span class="nx">length</span> <span class="o">-</span> <span class="mi">1</span><span class="p">];</span>
+</span><span class='line'>                <span class="kd">var</span> <span class="nx">macroArgs</span> <span class="o">=</span> <span class="nx">defines</span><span class="p">[</span><span class="nx">key</span><span class="p">].</span><span class="nx">slice</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>                <span class="kd">var</span> <span class="nx">replacement</span> <span class="o">=</span> <span class="nx">macroArgs</span><span class="p">.</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">text</span><span class="p">,</span> <span class="nx">arg</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="k">return</span> <span class="nx">text</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nb">RegExp</span><span class="p">(</span><span class="nx">arg</span><span class="p">,</span> <span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="p">(</span><span class="nx">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">));</span>
+</span><span class='line'>                <span class="p">},</span> <span class="nx">macroBody</span><span class="p">);</span>
+</span><span class='line'>                <span class="c1">// Now, use RegExp capturing to apply the replacement</span>
+</span><span class='line'>                <span class="c1">// Note that macro names can&#39;t have regex metacharacters, macro arguments cannot have commas</span>
+</span><span class='line'>                <span class="c1">// and will often fail if they have ending parens, and there must be at least one argument.</span>
+</span><span class='line'>                <span class="c1">// This is a messy, bad, but easy way of doing the replacement,</span>
+</span><span class='line'>                <span class="c1">// which fits with the theme of the post, I feel.</span>
+</span><span class='line'>                <span class="k">return</span> <span class="nx">text</span><span class="p">.</span><span class="nx">replace</span><span class="p">(</span><span class="nb">RegExp</span><span class="p">(</span><span class="nx">key</span> <span class="o">+</span> <span class="c1">// The macro name</span>
+</span><span class='line'>                                           <span class="s1">&#39;\\s*\\(\\s*(.+?)&#39;</span> <span class="o">+</span> <span class="c1">// The initial paren and first argument</span>
+</span><span class='line'>                                           <span class="nb">Array</span><span class="p">(</span><span class="nx">macroArgs</span><span class="p">.</span><span class="nx">length</span><span class="p">).</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;\\s*,\\s*(.+?)&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="c1">// The other args, separated by commas</span>
+</span><span class='line'>                                           <span class="s1">&#39;\\s*\\)&#39;</span><span class="p">,</span> <span class="c1">// The final paren</span>
+</span><span class='line'>                                           <span class="s1">&#39;g&#39;</span><span class="p">),</span> <span class="nx">replacement</span><span class="p">);</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">},</span> <span class="nx">getBody</span><span class="p">(</span><span class="nx">fn</span><span class="p">));</span>
+</span><span class='line'>    <span class="c1">// Use the function constructor to rebuild the function</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nb">Function</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">args</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">body</span><span class="p">));</span>
 </span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -515,14 +519,14 @@
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
 </pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">defines</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">PI</span> <span class="o">:</span> <span class="s1">&#39;3.14159&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">E</span> <span class="o">:</span> <span class="s1">&#39;2.71828&#39;</span><span class="p">,</span>
-</span><span class='line'>  <span class="nx">ABS</span> <span class="o">:</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;((x)&lt;0?-(x):(x))&#39;</span><span class="p">],</span>
-</span><span class='line'>  <span class="nx">RESISTORS_PARALLEL</span> <span class="o">:</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;((a)*(b)/((a)+(b)))&#39;</span><span class="p">]</span>
+</span><span class='line'>    <span class="nx">PI</span> <span class="o">:</span> <span class="s1">&#39;3.14159&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">E</span> <span class="o">:</span> <span class="s1">&#39;2.71828&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">ABS</span> <span class="o">:</span> <span class="p">[</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="s1">&#39;((x)&lt;0?-(x):(x))&#39;</span><span class="p">],</span>
+</span><span class='line'>    <span class="nx">RESISTORS_PARALLEL</span> <span class="o">:</span> <span class="p">[</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="s1">&#39;((a)*(b)/((a)+(b)))&#39;</span><span class="p">]</span>
 </span><span class='line'><span class="p">};</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">var</span> <span class="nx">doStuff</span> <span class="o">=</span> <span class="nx">JSPP</span><span class="p">(</span><span class="nx">defines</span><span class="p">,</span> <span class="kd">function</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">RESISTORS_PARALLEL</span><span class="p">(</span><span class="nx">PI</span><span class="p">,</span> <span class="nx">E</span><span class="p">)</span> <span class="o">*</span> <span class="nx">ABS</span><span class="p">(</span><span class="nx">val</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">RESISTORS_PARALLEL</span><span class="p">(</span><span class="nx">PI</span><span class="p">,</span> <span class="nx">E</span><span class="p">)</span> <span class="o">*</span> <span class="nx">ABS</span><span class="p">(</span><span class="nx">val</span><span class="p">);</span>
 </span><span class='line'><span class="p">});</span>
 </span><span class='line'>
 </span><span class='line'><span class="nx">doStuff</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="c1">// 2.9146452959536644</span>
@@ -530,7 +534,7 @@
 </span><span class='line'><span class="nx">doStuff</span><span class="p">.</span><span class="nx">toString</span><span class="p">()</span>
 </span><span class='line'><span class="cm">/*</span>
 </span><span class='line'><span class="cm">function anonymous(val) {</span>
-</span><span class='line'><span class="cm"> return ((3.14159)*(2.71828)/((3.14159)+(2.71828))) * ((val)&lt;0?-(val):(val));</span>
+</span><span class='line'><span class="cm">    return ((3.14159)*(2.71828)/((3.14159)+(2.71828))) * ((val)&lt;0?-(val):(val));</span>
 </span><span class='line'><span class="cm">}</span>
 </span><span class='line'><span class="cm">*/</span>
 </span></code></pre></td></tr></table></div></figure>
