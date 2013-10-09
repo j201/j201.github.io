@@ -9,7 +9,7 @@
   <meta name="author" content="j201">
 
   
-  <meta name="description" content="Note: Do not try this at work. It&rsquo;s not that bad but your coworkers and Douglas Crockford might get cross. with statements are a little-used, &hellip;">
+  <meta name="description" content="Many functional programming languages such as Scheme, Clojure and Haskell are heavily based on list processing, which has proved to be a useful &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -83,6 +83,436 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2013/09/27/functional-list-processing-in-js/">Functional List Processing in JS</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2013-09-27T14:39:00-04:00" pubdate data-updated="true">Sep 27<span>th</span>, 2013</time>
+        
+         | <a href="/blog/2013/09/27/functional-list-processing-in-js/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>Many functional programming languages such as Scheme, Clojure and Haskell are heavily based on list processing, which has proved to be a useful approach for dealing with data and code alike. In particular, they tend to have a wide range of useful list processing functions that can simplify the use of lists while allowing them to replace constructs like loops. While JS doesn&rsquo;t share the elegance or theoretical purity of such languages, it took some cues from them in ES5 when the <code>map</code>, <code>reduce</code>, <code>reduceRight</code>, <code>some</code>, <code>every</code>, and <code>filter</code> functions were added to <code>Array.prototype</code>. These higher-order functions added flexibility, better scoping, and simplicity to programming techniques that were usually previously accomplished with <code>for</code> loops. JS is still lacking many of the useful features that functional languages use for creating and processing lists, but many of them can be implemented fairly easily in order to make it easier to use arrays and banish loops once and for all.</p>
+
+<h2><code>range</code>, or list comprehensions without the sugar</h2>
+
+<p>Languages like Python and CoffeeScript have <a href="http://en.wikipedia.org/wiki/List_comprehension">list comprehensions</a>: terse syntaxes for making lists with given ranges and constraints. However, I agree with the LISP philosophy that you shouldn&rsquo;t solve such simple problems by throwing more syntax at them &ndash; existing syntax should be used instead. For example, Clojure uses a couple of regular functions to do the same thing: whereas you could write <code>(i * 5 for i in [1..5])</code> in CoffeeScript, the equivalent Clojure would look like <code>(for [i (range 1 6)] (* i 5))</code>, which justs uses function calls and a binding form, maintaining syntactic simplicity. Well, the same approach can be applied in JavaScript with the following helper function:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">range</span><span class="p">(</span><span class="nx">startOrEnd</span><span class="p">,</span> <span class="nx">end</span><span class="p">,</span> <span class="nx">step</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">start</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">arguments</span><span class="p">.</span><span class="nx">length</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">start</span> <span class="o">=</span> <span class="nx">startOrEnd</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">start</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>        <span class="nx">end</span> <span class="o">=</span> <span class="nx">startOrEnd</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">step</span> <span class="o">=</span> <span class="nx">step</span> <span class="o">||</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">step</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">start</span> <span class="o">&gt;</span> <span class="nx">end</span> <span class="o">||</span> <span class="nx">step</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">&amp;&amp;</span> <span class="nx">start</span> <span class="o">&lt;</span> <span class="nx">end</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">return</span> <span class="p">[];</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">length</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">ceil</span><span class="p">((</span><span class="nx">end</span> <span class="o">-</span> <span class="nx">start</span><span class="p">)</span> <span class="o">/</span> <span class="nx">step</span><span class="p">);</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">i</span> <span class="o">*</span> <span class="nx">step</span> <span class="o">+</span> <span class="nx">start</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This function acts more or less the same way as <a href="http://clojuredocs.org/clojure_core/clojure.core/range">Clojure&rsquo;s range function</a>:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">range</span><span class="p">(</span><span class="mi">5</span><span class="p">);</span> <span class="c1">// [0, 1, 2, 3, 4]</span>
+</span><span class='line'><span class="nx">range</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span> <span class="c1">// [-2, -1, 0, 1, 2]</span>
+</span><span class='line'><span class="nx">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span> <span class="c1">// [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So, first of all, this pretty much replaces <code>for</code> loops. Instead of writing <code>for (var i = 0; i &lt; 10; i += 2) { ...</code>, you can write <code>range(0, 10, 2).forEach(function(i) { ...</code>, which is clearer in my opinion and carries other stylistic benefits. Also note that if you use <code>map</code> instead of <code>forEach</code>, you can get an array of results as well as getting the for loop behaviour, which can be very convenient and which brings us to our final goal of emulating list comprehensions:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">).</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span> <span class="o">*</span> <span class="mi">5</span><span class="p">;});</span> <span class="c1">// Tadaa! [5, 10, 15, 20, 25]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>That&rsquo;s nice and useful, but not very pretty. Fortunately ES6 arrow functions will make it look much nicer. (ES6 also has list comprehensions, which I don&rsquo;t think are really necessary, but ES6 is proving to be a mish-mash of features anyway).</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">).</span><span class="nx">map</span><span class="p">(</span><span class="nx">x</span> <span class="o">=&gt;</span> <span class="nx">x</span> <span class="o">*</span> <span class="mi">5</span><span class="p">);</span> <span class="c1">// [5, 10, 15, 20, 25]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And there you have it: the <code>for</code> loop and loop comprehension killer. You&rsquo;ll occasionally see hacks like <code>Array.apply(null, Array(10)).map(Number.call, Number)</code> to get a range on the fly, but you&rsquo;re much better off doing it properly with a helper function or using one from a library like Underscore.</p>
+
+<p>More than any other function on this page, I&rsquo;d like to see this implemented as a native function, <code>Array.range</code> perhaps. It&rsquo;s really the last piece in the puzzle to making full use of <code>forEach</code>, <code>map</code>, etc.</p>
+
+<h2>Zipping around</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">zipWith</span><span class="p">(</span><span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">arrays</span> <span class="o">=</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">slice</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="nx">arguments</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">arrays</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">throw</span> <span class="k">new</span> <span class="nb">Error</span><span class="p">(</span><span class="s1">&#39;zip requires at least 2 arrays&#39;</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">length</span> <span class="o">=</span> <span class="nx">arrays</span><span class="p">.</span><span class="nx">slice</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">minLength</span><span class="p">,</span> <span class="nx">arr</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nx">arr</span><span class="p">.</span><span class="nx">length</span> <span class="o">&lt;</span> <span class="nx">minLength</span> <span class="o">?</span> <span class="nx">arr</span><span class="p">.</span><span class="nx">length</span> <span class="o">:</span> <span class="nx">minLength</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">},</span> <span class="nx">arrays</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">length</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">fn</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">arrays</span><span class="p">.</span><span class="nx">map</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">arr</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">return</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+</span><span class='line'>        <span class="p">})));</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/* </span>
+</span><span class='line'><span class="cm">     * If you have range(...), this last section could be expressed more cleanly as</span>
+</span><span class='line'><span class="cm">     * return range(length).map(function(i) {</span>
+</span><span class='line'><span class="cm">     *     return fn.apply(null, arrays.map(function(arr) {</span>
+</span><span class='line'><span class="cm">     *         return arr[i];</span>
+</span><span class='line'><span class="cm">     *     }));</span>
+</span><span class='line'><span class="cm">     * });</span>
+</span><span class='line'><span class="cm">     */</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This one is in Haskell and Clojure (as <code>map</code>). It takes a function as its first parameter and at least two arrays as subsequent parameters, then it returns an array of the results of calling the function with the array elements at the corresponding indices as arguments. So for example, if you called <code>zipWith(fn, arr1, arr2)</code>, it would return <code>[fn(arr1[0], arr2[0]), fn(arr1[1], arr2[1]), fn(arr1[2], arr2[2]), ...]</code>. <code>zipWith.apply(...)</code> is especially useful for working with matrices, but it has a range of other uses. Here are a couple of practical examples:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">arr1</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">],</span> <span class="nx">arr2</span> <span class="o">=</span> <span class="p">[</span><span class="mi">6</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Sum the corresponding elements of the arrays</span>
+</span><span class='line'><span class="nx">zipWith</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span><span class="p">;</span> <span class="p">},</span> <span class="nx">arr1</span><span class="p">,</span> <span class="nx">arr2</span><span class="p">);</span> <span class="c1">// [7, 4, 2]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Test if the arrays are equal</span>
+</span><span class='line'><span class="nx">zipWith</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">a</span> <span class="o">===</span> <span class="nx">b</span><span class="p">;</span> <span class="p">},</span> <span class="nx">arr1</span><span class="p">,</span> <span class="nx">arr2</span><span class="p">).</span><span class="nx">every</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">x</span><span class="p">;</span> <span class="p">});</span> <span class="c1">// false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And while we&rsquo;re talking about array equality,</p>
+
+<h2>Array equality</h2>
+
+<p>When you&rsquo;re using arrays as your main data structure, you need to be able to check whether one array has the same values as another. There are good reasons for arrays to be treated as unique for comparison operators, but you <em>will</em> need an equation like this in order to do functional-style list processing. Note that this uses deep equality testing for arrays and shallow equality testing for other objects.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">arraysEqual</span><span class="p">(</span><span class="nx">arr1</span><span class="p">,</span> <span class="nx">arr2</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">arr1</span><span class="p">.</span><span class="nx">length</span> <span class="o">!=</span> <span class="nx">arr2</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="nx">arr1</span> <span class="o">==</span> <span class="kc">null</span> <span class="o">||</span> <span class="nx">arr2</span> <span class="o">==</span> <span class="kc">null</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">return</span> <span class="nx">arr1</span> <span class="o">===</span> <span class="nx">arr2</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">arr1</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">arr1</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span> <span class="o">&amp;&amp;</span> <span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">arr2</span><span class="p">[</span><span class="nx">i</span><span class="p">]))</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="nx">arraysEqual</span><span class="p">(</span><span class="nx">arr1</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">arr2</span><span class="p">[</span><span class="nx">i</span><span class="p">]))</span>
+</span><span class='line'>                <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>            <span class="k">if</span> <span class="p">(</span><span class="nx">arr1</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">!==</span> <span class="nx">arr2</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
+</span><span class='line'>                <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">arraysEqual</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]]);</span> <span class="c1">// true</span>
+</span><span class='line'><span class="nx">arraysEqual</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]],</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]);</span> <span class="c1">// false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Repetition</h2>
+
+<p><code>range</code> is by far the most useful list builder function, but sometimes it comes in handy to make a list that&rsquo;s just the same thing over and over again:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">repeat</span><span class="p">(</span><span class="nx">times</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+</span><span class='line'>    <span class="k">while</span> <span class="p">(</span><span class="nx">times</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+</span><span class='line'>        <span class="nx">times</span><span class="o">--</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And some examples:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// Multiplying a string</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">googol</span> <span class="o">=</span> <span class="s1">&#39;1&#39;</span> <span class="o">+</span> <span class="nx">repeat</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">).</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="c1">// &quot;10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000&quot;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Roll 10d6</span>
+</span><span class='line'><span class="kd">function</span> <span class="nx">rollDie</span><span class="p">(</span><span class="nx">sides</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span> <span class="o">*</span> <span class="nx">sides</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">repeat</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">6</span><span class="p">).</span><span class="nx">map</span><span class="p">(</span><span class="nx">rollDie</span><span class="p">).</span><span class="nx">reduce</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span><span class="p">;</span> <span class="p">});</span> <span class="c1">// 38 (for example)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Nesting and unnesting</h2>
+
+<p>Last of all, it&rsquo;s often useful to deal with lists within lists, so here are a couple of functions for that. This first one returns a list split up into a sublists of a given length.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">partition</span><span class="p">(</span><span class="nx">n</span><span class="p">,</span> <span class="nx">array</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">length</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">array</span><span class="p">.</span><span class="nx">length</span> <span class="o">/</span> <span class="nx">n</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// Again, range would make this part nicer</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">([]);</span>
+</span><span class='line'>        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">result</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">push</span><span class="p">(</span><span class="nx">array</span><span class="p">[</span><span class="nx">n</span> <span class="o">*</span> <span class="nx">i</span> <span class="o">+</span> <span class="nx">j</span><span class="p">]);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">partition</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="nx">range</span><span class="p">(</span><span class="mi">9</span><span class="p">));</span> <span class="c1">// [[0, 1, 2], [3, 4, 5], [6, 7, 8]]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Make an empty 4*4 matrix</span>
+</span><span class='line'><span class="nx">partition</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="nx">repeat</span><span class="p">(</span><span class="mi">16</span><span class="p">,</span> <span class="mi">0</span><span class="p">));</span> <span class="c1">// [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>And this takes a nested list and flattens it into a single layer.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">flatten</span><span class="p">(</span><span class="nx">arr</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+</span><span class='line'>    <span class="nx">arr</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="kd">function</span><span class="p">(</span><span class="nx">el</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nb">Array</span><span class="p">.</span><span class="nx">isArray</span><span class="p">(</span><span class="nx">el</span><span class="p">))</span>
+</span><span class='line'>            <span class="nx">result</span> <span class="o">=</span> <span class="nx">result</span><span class="p">.</span><span class="nx">concat</span><span class="p">(</span><span class="nx">flatten</span><span class="p">(</span><span class="nx">el</span><span class="p">));</span> <span class="c1">// w00t recursion</span>
+</span><span class='line'>        <span class="k">else</span>
+</span><span class='line'>            <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">el</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">});</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">flatten</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="p">[[[</span><span class="mi">5</span><span class="p">]]]]]);</span> <span class="c1">// [1, 2, 3, 4, 5]</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">flatten</span><span class="p">(</span><span class="nx">repeat</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="nx">range</span><span class="p">(</span><span class="mi">2</span><span class="p">)));</span> <span class="c1">// [0, 1, 0, 1, 0, 1, 0, 1]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Conclusion</h2>
+
+<p>The point of these functions isn&rsquo;t just to make list processing a bit less wordy; they allow you to manipulate lists in a completely different way. Instead of dealing with lists in they way you generally see in the functions themselves &ndash; changing an index variable to represent the current element, pushing and changing arrays of results, etc. &ndash; you can express most list functions in a single statement, with no variable modifications whatsoever. Then, you can build up list operations and eventually entire programs by combining such functions into other functions, without having to mentally keep track of variables changing state. It takes some getting used to, but it&rsquo;s a great way to program.</p>
+
+<p>Here&rsquo;s an example: the <a href="http://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher">Vigenère cipher</a>. Basically, it&rsquo;s a Caesar cipher, but each letter is shifted by a different amount depending on a key, which if too short is repeated.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// Does modular addition of capital letters, e.g., Y + D = B</span>
+</span><span class='line'><span class="kd">function</span> <span class="nx">modAddCapsLetters</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nb">String</span><span class="p">.</span><span class="nx">fromCharCode</span><span class="p">((</span><span class="nx">a</span><span class="p">.</span><span class="nx">charCodeAt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="nx">b</span><span class="p">.</span><span class="nx">charCodeAt</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">-</span> <span class="mi">65</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">%</span> <span class="mi">26</span> <span class="o">+</span> <span class="mi">65</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// The imperative way</span>
+</span><span class='line'><span class="kd">function</span> <span class="nx">vigenereImp</span><span class="p">(</span><span class="nx">str</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">keyPos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">result</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">str</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">result</span> <span class="o">+=</span> <span class="nx">modAddCapsLetters</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">charAt</span><span class="p">(</span><span class="nx">i</span><span class="p">),</span> <span class="nx">key</span><span class="p">[</span><span class="nx">keyPos</span><span class="p">]));</span>
+</span><span class='line'>        <span class="nx">keyPos</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nx">keyPos</span> <span class="o">&gt;=</span> <span class="nx">key</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span>
+</span><span class='line'>            <span class="nx">keyPos</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// The functional way</span>
+</span><span class='line'><span class="kd">function</span> <span class="nx">vigenere</span><span class="p">(</span><span class="nx">str</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">keyRepeats</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">ceil</span><span class="p">(</span><span class="nx">str</span><span class="p">.</span><span class="nx">length</span> <span class="o">/</span> <span class="nx">key</span><span class="p">.</span><span class="nx">length</span><span class="p">),</span>
+</span><span class='line'>        <span class="nx">repeatedKey</span> <span class="o">=</span> <span class="nx">flatten</span><span class="p">(</span><span class="nx">repeat</span><span class="p">(</span><span class="nx">keyRepeats</span><span class="p">,</span> <span class="nx">key</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)));</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">zipWith</span><span class="p">(</span><span class="nx">modAddCapsLetters</span><span class="p">,</span> <span class="nx">str</span><span class="p">.</span><span class="nx">split</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">),</span> <span class="nx">repeatedKey</span><span class="p">).</span><span class="nx">join</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">vigenere</span><span class="p">(</span><span class="s2">&quot;LOOPSAREFORTHEWEAK&quot;</span><span class="p">,</span> <span class="s2">&quot;LISPY&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="c1">// &quot;WWGEQLZWUMCBZTUPIC&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So the imperative way does it step by step. It creates a variable <code>i</code> that increases for each letter, a variable <code>keyPos</code> that increases for each letter but gets reset to 0 once it&rsquo;s equal to the key length, and then shifts the letter in the input string by the given letter in the key. It concatenates each one to the end of a result string then returns it. Simple enough, but increases in complexity based on the amount of mutable data you have to keep track of. The functional way, instead, finds out how many times to repeat the key, creates a new array of letters with the key repeated the necessary amount, and then zips that with the original string using <code>modAddCapsLetters</code>. It&rsquo;s really a matter of preference, but I find the latter way of doing things conceptually simpler, and that helps a lot when building larger programs.</p>
+
+<p>Check out Underscore or Lo-Dash for implementations of many of these functions.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -934,6 +1364,10 @@
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2013/09/27/functional-list-processing-in-js/">Functional List Processing in JS</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2013/08/03/evil-js-with-considered-somewhat-useful/">Evil JS: With Considered Somewhat Useful</a>
