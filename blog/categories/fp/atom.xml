@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: FP | j201's Meanderings]]></title>
+  <link href="http://j201.github.io/blog/categories/fp/atom.xml" rel="self"/>
+  <link href="http://j201.github.io/"/>
+  <updated>2014-04-20T10:45:49-04:00</updated>
+  <id>http://j201.github.io/</id>
+  <author>
+    <name><![CDATA[j201]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Expressing Yourself]]></title>
+    <link href="http://j201.github.io/blog/2014/04/20/expressing-yourself/"/>
+    <updated>2014-04-20T10:42:00-04:00</updated>
+    <id>http://j201.github.io/blog/2014/04/20/expressing-yourself</id>
+    <content type="html"><![CDATA[<p>The concept of &lsquo;expressiveness&rsquo; is one that appears a lot in programming language debates. Broadly speaking, it means the ease with which a language can express ideas. This is often taken to mean whether the language express common constructs prettily and tersely. But I feel that this isn&rsquo;t the whole story. For example, I&rsquo;m not a fan of &lsquo;expressive&rsquo; syntactical constructs like list comprehensions. Sure, they can express some common list operations in a readable manner, but they&rsquo;re inherently limited to the features supported by the syntax. Once you want to do an operation that isn&rsquo;t part of the list comprehension syntax, you have to fall back on the primitive constructs of the language, and you&rsquo;d better hope that they don&rsquo;t uglify the whole thing. I feel that an expressive language should go further.</p>
+
+<p>In particular, it bothers me to see people gushing about how the new Python-ish features of ES6 such as <code>for..of</code>, list comprehensions, and classes will finally make JS expressive. I disagree for a few reasons:</p>
+
+<ul>
+<li>Expressive programming is an approach to programming, not a characteristic of the language</li>
+<li>This approach is already possible and easy in JS</li>
+<li>Whether a language can be used expressively is far more determined by its powerful generic features, such as first-class functions and metaprogramming, than problem-specific syntactical constructs, like list comprehensions</li>
+</ul>
+
+
+<p>Instead, I would contend that expressive programming is about writing operations in a way that closely resembles a simple abstract description of each operation, using as few unimportant programming concerns as possible, and that this can be accomplished without highly specialized syntactical constructs.</p>
+
+<p>I&rsquo;ll show some code to explain. A simple example of a non-expressive construct is the for loop. For example, it&rsquo;s commonly used to do a thing for each element of an array:</p>
+
+<p>``` javascript
+for (var i = 0; i &lt; arr.length; i++) {</p>
+
+<pre><code>// Do stuff with arr[i]
+</code></pre>
+
+<p>}
+```</p>
+
+<p>Conceptually, we want to just do something for each element of an array, but the for loop forces us to deal instead with handling an index variable and using it. This is an example of <a href="http://en.wikipedia.org/wiki/Accidental_complexity">incidental complexity</a>: it&rsquo;s an implementation detail we don&rsquo;t care about and that gets in the way of expressing the idea we want to express. A more expressive formulation would be the following:</p>
+
+<p>``` javascript
+forEach(arr, el => {</p>
+
+<pre><code>// Do stuff with el
+</code></pre>
+
+<p>});
+```</p>
+
+<p>You&rsquo;ll note that this is very close to our original statement of the problem: <em>do a thing for each element of an array</em>, just with the words rearranged. It&rsquo;s way more expressive than the for loop, and we can make it ourselves very easily without needing to wait for the language designers to add special syntactical constructs like <code>foreach</code> or <code>for of</code> loops:</p>
+
+<p>``` javascript
+function forEach(arr, fn) {</p>
+
+<pre><code>for (var i = 0; i &lt; arr.length; i++) {
+    fn(arr);
+}
+</code></pre>
+
+<p>}
+// arr.forEach can be used instead, but I&rsquo;m reimplementing it for the sake of argument
+```</p>
+
+<p>This shows why higher order functions are so important for expressive programming. They let you make abstractions like our forEach function that can abstract over behaviour, rather than just dealing with data structures. This means you have far more flexibility in the expressive constructs you use and you have access to a much wider variety of them without being limited by the syntactical constructs of the language. Any decent functional list library will have a range of functionality many times bigger than specialized list handling syntax can muster.</p>
+
+<p>What this example also shows is that expressive programming is not just a characteristic of the language, it&rsquo;s an approach the programmer must take. This is especially true in JavaScript, where you have access to both high-level functional approaches and low-level C-ish constructs like loops and switch statements. And I would point to Scheme as a great example of a language that despite having few specialized features can be programmed very expressively (see SICP and the beautiful functions therein).</p>
+
+<p>A good way to get used to this approach is to tackle problems in the following way:</p>
+
+<ul>
+<li>Determine an approach that will solve your problem in terms of simpler and more generic operations</li>
+<li>Write that approach in a straightforward expressive way, even if it means using functions you don&rsquo;t have yet</li>
+<li>Implement those functions the same way, writing them expressively in terms of smaller problems</li>
+<li>Continue until all of the necessary functions are implemented
+
+<ul>
+<li>In some cases, generic operations might need to use low-level approaches, like the <code>forEach</code> function above</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Let&rsquo;s do an example. <a href="http://projecteuler.net/problem=3">Project Euler problem 3</a> asks for the largest prime factor of 600851475143. I&rsquo;ll use ES6 arrow functions for readability, but these are easily translatable into normal JS functions.</p>
+
+<p>``` javascript
+var projectEuler3 = () =></p>
+
+<pre><code>Math.max.apply(null, primeFactors(600851475143));
+</code></pre>
+
+<p>```</p>
+
+<p>So, we&rsquo;ve expressed exactly what we&rsquo;re looking for: the maximum element of the list of prime factors of 600851475143. Now, we need to implement primeFactors. Let&rsquo;s use the following algorithm:</p>
+
+<ul>
+<li>Find the first number from 2 to sqrt(x) that is a factor of x</li>
+<li>If such a number exists, return that number, along with the prime factors of x divided by that number</li>
+<li>Otherwise, return an array just with x (because x is prime)</li>
+</ul>
+
+
+<p>``` javascript
+var primeFactors = x => {</p>
+
+<pre><code>var factor = find(range(2, Math.floor(Math.sqrt(x)) + 1),
+    n =&gt; isFactor(n, x));
+return factor !== null ?
+    [factor].concat(primeFactors(x / factor)) :
+    [x];
+</code></pre>
+
+<p>};
+```</p>
+
+<p>Again, really close to how we expressed the solution. But we used the functions <code>find</code>, <code>range</code>, and <code>isFactor</code>, so let&rsquo;s implement those. (The reason for adding one to the square root calculation is that range functions are generally inclusive on the lower bound and exclusive on the upper bound.)</p>
+
+<p>``` javascript
+var isFactor = (a, b) => isInteger(b / a);</p>
+
+<p>var isInteger = x => x % 1 === 0;
+```</p>
+
+<p>A number is a factor of another if the result of their division is an integer, and a number is an integer if the number modulo one is zero. Reads like a book, although in reality you certainly wouldn&rsquo;t constantly reimplement these.</p>
+
+<p>Now we&rsquo;re down to more generic, simpler functions. Unfortunately, given the features JS provides, these have to be a bit more low-level. But they&rsquo;re still much shorter and easy to understand than the monolithic solutions you usually see for these kinds of problems. They&rsquo;re also generic enough to be gotten from libraries or put in a library and reused.</p>
+
+<p>``` javascript
+var find = (arr, pred) => {</p>
+
+<pre><code>for (var i = 0; i &lt; arr.length; i++)
+    if (pred(arr[i]))
+        return arr[i];
+return null;
+</code></pre>
+
+<p>};</p>
+
+<p>var range = (from, to) => {</p>
+
+<pre><code>var result = [];
+for (var n = from; n &lt; to; n++)
+    result.push(n);
+return result;
+</code></pre>
+
+<p>};
+```</p>
+
+<p>So here, we&rsquo;re using <code>for</code> loops to implement more the more abstract operations of finding the first element of a list that matches a predicate (a higher order function!) and getting a range of numbers. Any decent functional list library will provide similar functions, and <code>Array.prototype.find</code> is coming in ES6.</p>
+
+<p><a href="http://www.es6fiddle.net/hu8fuftc/">And we&rsquo;re done!</a></p>
+
+<p>So, this is how I see expressive programming. It&rsquo;s about coding your solutions as closely to the conceptual solutions as possible. This can be done with short, simple, pure functions and taking advantage of higher-order functions to make powerful, expressive abstractions. And it has many benefits:</p>
+
+<ul>
+<li>The problem-specific functions are short and easily understood</li>
+<li>Little incidental complexity</li>
+<li>Each function is easily testable and reusable</li>
+<li>Understanding and writing each function has a low cognitive load</li>
+<li>Low-level and difficult-to-read approaches are only used when really necessary</li>
+<li>Allows for easy construction of <a href="http://mitpress.mit.edu/sicp/full-text/sicp/book/node29.html">abstraction barriers</a></li>
+<li>No specific syntax needed</li>
+</ul>
+
+
+<p>So, as a JavaScript programmer, the features I am most excited about in ES6 are those that help with this goal, like arrow functions, which make functions easier to read and use, and the new HOFs coming to Array.prototype. Those are the features that really help expressive programming in JS, not limited syntactical additions.</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Functional List Processing in JS]]></title>
+    <link href="http://j201.github.io/blog/2013/09/27/functional-list-processing-in-js/"/>
+    <updated>2013-09-27T14:39:00-04:00</updated>
+    <id>http://j201.github.io/blog/2013/09/27/functional-list-processing-in-js</id>
+    <content type="html"><![CDATA[<p>Many functional programming languages such as Scheme, Clojure and Haskell are heavily based on list processing, which has proved to be a useful approach for dealing with data and code alike. In particular, they tend to have a wide range of useful list processing functions that can simplify the use of lists while allowing them to replace constructs like loops. While JS doesn&rsquo;t share the elegance or theoretical purity of such languages, it took some cues from them in ES5 when the <code>map</code>, <code>reduce</code>, <code>reduceRight</code>, <code>some</code>, <code>every</code>, and <code>filter</code> functions were added to <code>Array.prototype</code>. These higher-order functions added flexibility, better scoping, and simplicity to programming techniques that were usually previously accomplished with <code>for</code> loops. JS is still lacking many of the useful features that functional languages use for creating and processing lists, but many of them can be implemented fairly easily in order to make it easier to use arrays and banish loops once and for all.</p>
+
+<h2><code>range</code>, or list comprehensions without the sugar</h2>
+
+<p>Languages like Python and CoffeeScript have <a href="http://en.wikipedia.org/wiki/List_comprehension">list comprehensions</a>: terse syntaxes for making lists with given ranges and constraints. However, I agree with the LISP philosophy that you shouldn&rsquo;t solve such simple problems by throwing more syntax at them &ndash; existing syntax should be used instead. For example, Clojure uses a couple of regular functions to do the same thing: whereas you could write <code>(i * 5 for i in [1..5])</code> in CoffeeScript, the equivalent Clojure would look like <code>(for [i (range 1 6)] (* i 5))</code>, which justs uses function calls and a binding form, maintaining syntactic simplicity. Well, the same approach can be applied in JavaScript with the following helper function:</p>
+
+<p>```js
+function range(startOrEnd, end, step) {</p>
+
+<pre><code>var start;
+if (arguments.length &gt; 1) {
+    start = startOrEnd;
+} else {
+    start = 0;
+    end = startOrEnd;
+}
+step = step || 1;
+
+if (step &gt; 0 &amp;&amp; start &gt; end || step &lt; 0 &amp;&amp; start &lt; end)
+    return [];
+
+var length = Math.ceil((end - start) / step);
+var result = [];
+for (var i = 0; i &lt; length; i++) {
+    result.push(i * step + start);
+}
+return result;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This function acts more or less the same way as <a href="http://clojuredocs.org/clojure_core/clojure.core/range">Clojure&rsquo;s range function</a>:</p>
+
+<p><code>js
+range(5); // [0, 1, 2, 3, 4]
+range(-2, 3); // [-2, -1, 0, 1, 2]
+range(10, 0, -1); // [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]
+</code></p>
+
+<p>So, first of all, this pretty much replaces <code>for</code> loops. Instead of writing <code>for (var i = 0; i &lt; 10; i += 2) { ...</code>, you can write <code>range(0, 10, 2).forEach(function(i) { ...</code>, which is clearer in my opinion and carries other stylistic benefits. Also note that if you use <code>map</code> instead of <code>forEach</code>, you can get an array of results as well as getting the for loop behaviour, which can be very convenient and which brings us to our final goal of emulating list comprehensions:</p>
+
+<p><code>js
+range(1, 6).map(function(x) { return x * 5;}); // Tadaa! [5, 10, 15, 20, 25]
+</code></p>
+
+<p>That&rsquo;s nice and useful, but not very pretty. Fortunately ES6 arrow functions will make it look much nicer. (ES6 also has list comprehensions, which I don&rsquo;t think are really necessary, but ES6 is proving to be a mish-mash of features anyway).</p>
+
+<p><code>js
+range(1, 6).map(x =&gt; x * 5); // [5, 10, 15, 20, 25]
+</code></p>
+
+<p>And there you have it: the <code>for</code> loop and loop comprehension killer. You&rsquo;ll occasionally see hacks like <code>Array.apply(null, Array(10)).map(Number.call, Number)</code> to get a range on the fly, but you&rsquo;re much better off doing it properly with a helper function or using one from a library like Underscore.</p>
+
+<p>More than any other function on this page, I&rsquo;d like to see this implemented as a native function, <code>Array.range</code> perhaps. It&rsquo;s really the last piece in the puzzle to making full use of <code>forEach</code>, <code>map</code>, etc.</p>
+
+<h2>Zipping around</h2>
+
+<p>```js
+function zipWith(fn) {</p>
+
+<pre><code>var arrays = Array.prototype.slice.call(arguments, 1);
+if (arrays.length &lt; 2)
+    throw new Error('zip requires at least 2 arrays');
+
+var length = arrays.slice(1).reduce(function(minLength, arr) {
+    return arr.length &lt; minLength ? arr.length : minLength;
+}, arrays[0].length);
+
+var result = [];
+for (var i = 0; i &lt; length; i++) {
+    result.push(fn.apply(null, arrays.map(function(arr) {
+        return arr[i];
+    })));
+}
+return result;
+
+/* 
+ * If you have range(...), this last section could be expressed more cleanly as
+ * return range(length).map(function(i) {
+ *     return fn.apply(null, arrays.map(function(arr) {
+ *         return arr[i];
+ *     }));
+ * });
+ */
+</code></pre>
+
+<p>}
+```</p>
+
+<p>This one is in Haskell and Clojure (as <code>map</code>). It takes a function as its first parameter and at least two arrays as subsequent parameters, then it returns an array of the results of calling the function with the array elements at the corresponding indices as arguments. So for example, if you called <code>zipWith(fn, arr1, arr2)</code>, it would return <code>[fn(arr1[0], arr2[0]), fn(arr1[1], arr2[1]), fn(arr1[2], arr2[2]), ...]</code>. <code>zipWith.apply(...)</code> is especially useful for working with matrices, but it has a range of other uses. Here are a couple of practical examples:</p>
+
+<p>```js
+var arr1 = [1, 2, 3], arr2 = [6, 2, -1];</p>
+
+<p>// Sum the corresponding elements of the arrays
+zipWith(function(a, b) { return a + b; }, arr1, arr2); // [7, 4, 2]</p>
+
+<p>// Test if the arrays are equal
+zipWith(function(a, b) { return a === b; }, arr1, arr2).every(function(x) { return x; }); // false
+```</p>
+
+<p>And while we&rsquo;re talking about array equality,</p>
+
+<h2>Array equality</h2>
+
+<p>When you&rsquo;re using arrays as your main data structure, you need to be able to check whether one array has the same values as another. There are good reasons for arrays to be treated as unique for comparison operators, but you <em>will</em> need an equation like this in order to do functional-style list processing. Note that this uses deep equality testing for arrays and shallow equality testing for other objects.</p>
+
+<p>```js
+function arraysEqual(arr1, arr2) {</p>
+
+<pre><code>if (arr1.length != arr2.length)
+    return false;
+if (arr1 == null || arr2 == null)
+    return arr1 === arr2;
+
+for (var i = 0; i &lt; arr1.length; i++) {
+    if (Array.isArray(arr1[i]) &amp;&amp; Array.isArray(arr2[i])) {
+        if (!arraysEqual(arr1[i], arr2[i]))
+            return false;
+    } else {
+        if (arr1[i] !== arr2[i])
+            return false;
+    }
+}
+return true;
+</code></pre>
+
+<p>}</p>
+
+<p>arraysEqual([1, 2, [3, 4, 5]], [1, 2, [3, 4, 5]]); // true
+arraysEqual([1, 2, [3, 4]], [1, 2, 3, 4]); // false
+```</p>
+
+<h2>Repetition</h2>
+
+<p><code>range</code> is by far the most useful list builder function, but sometimes it comes in handy to make a list that&rsquo;s just the same thing over and over again:</p>
+
+<p>```js
+function repeat(times, value) {</p>
+
+<pre><code>var result = [];
+while (times &gt; 0) {
+    result.push(value);
+    times--;
+}
+return result;
+</code></pre>
+
+<p>}
+```</p>
+
+<p>And some examples:</p>
+
+<p>`&ldquo;js
+// Multiplying a string
+var googol = &lsquo;1&rsquo; + repeat(100, &lsquo;0&rsquo;).join(&rdquo;);
+// &ldquo;10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000&rdquo;</p>
+
+<p>// Roll 10d6
+function rollDie(sides) {</p>
+
+<pre><code>return Math.floor(Math.random() * sides) + 1;
+</code></pre>
+
+<p>}</p>
+
+<p>repeat(10, 6).map(rollDie).reduce(function(a, b) { return a + b; }); // 38 (for example)
+```</p>
+
+<h2>Nesting and unnesting</h2>
+
+<p>Last of all, it&rsquo;s often useful to deal with lists within lists, so here are a couple of functions for that. This first one returns a list split up into a sublists of a given length.</p>
+
+<p>```js
+function partition(n, array) {</p>
+
+<pre><code>var result = [];
+var length = Math.floor(array.length / n);
+
+// Again, range would make this part nicer
+for (var i = 0; i &lt; length; i++) {
+    result.push([]);
+    for (var j = 0; j &lt; n; j++) {
+        result[i].push(array[n * i + j]);
+    }
+}
+return result;
+</code></pre>
+
+<p>}</p>
+
+<p>partition(3, range(9)); // [[0, 1, 2], [3, 4, 5], [6, 7, 8]]</p>
+
+<p>// Make an empty 4*4 matrix
+partition(4, repeat(16, 0)); // [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]
+```</p>
+
+<p>And this takes a nested list and flattens it into a single layer.</p>
+
+<p>```js
+function flatten(arr) {</p>
+
+<pre><code>var result = [];
+arr.forEach(function(el) {
+    if (Array.isArray(el))
+        result = result.concat(flatten(el)); // w00t recursion
+    else
+        result.push(el);
+});
+return result;
+</code></pre>
+
+<p>}</p>
+
+<p>flatten([1, 2, [3, 4, [[[5]]]]]); // [1, 2, 3, 4, 5]</p>
+
+<p>flatten(repeat(4, range(2))); // [0, 1, 0, 1, 0, 1, 0, 1]
+```</p>
+
+<h2>Conclusion</h2>
+
+<p>The point of these functions isn&rsquo;t just to make list processing a bit less wordy; they allow you to manipulate lists in a completely different way. Instead of dealing with lists in they way you generally see in the functions themselves &ndash; changing an index variable to represent the current element, pushing and changing arrays of results, etc. &ndash; you can express most list functions in a single statement, with no variable modifications whatsoever. Then, you can build up list operations and eventually entire programs by combining such functions into other functions, without having to mentally keep track of variables changing state. It takes some getting used to, but it&rsquo;s a great way to program.</p>
+
+<p>Here&rsquo;s an example: the <a href="http://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher">Vigenère cipher</a>. Basically, it&rsquo;s a Caesar cipher, but each letter is shifted by a different amount depending on a key, which if too short is repeated.</p>
+
+<p>```js
+// Does modular addition of capital letters, e.g., Y + D = B
+function modAddCapsLetters(a, b) {</p>
+
+<pre><code>return String.fromCharCode((a.charCodeAt(0) + b.charCodeAt(0) - 65 * 2) % 26 + 65);
+</code></pre>
+
+<p>}</p>
+
+<p>// The imperative way
+function vigenereImp(str, key) {</p>
+
+<pre><code>var keyPos = 0, result = "";
+for (var i = 0; i &lt; str.length; i++) {
+    result += modAddCapsLetters(str.charAt(i), key[keyPos]));
+    keyPos++;
+    if (keyPos &gt;= key.length)
+        keyPos = 0;
+}
+return result;
+</code></pre>
+
+<p>}</p>
+
+<p>// The functional way
+function vigenere(str, key) {</p>
+
+<pre><code>var keyRepeats = Math.ceil(str.length / key.length),
+    repeatedKey = flatten(repeat(keyRepeats, key.split('')));
+return zipWith(modAddCapsLetters, str.split(''), repeatedKey).join('');
+</code></pre>
+
+<p>}</p>
+
+<p>vigenere(&ldquo;LOOPSAREFORTHEWEAK&rdquo;, &ldquo;LISPY&rdquo;);
+// &ldquo;WWGEQLZWUMCBZTUPIC&rdquo;</p>
+
+<p>```</p>
+
+<p>So the imperative way does it step by step. It creates a variable <code>i</code> that increases for each letter, a variable <code>keyPos</code> that increases for each letter but gets reset to 0 once it&rsquo;s equal to the key length, and then shifts the letter in the input string by the given letter in the key. It concatenates each one to the end of a result string then returns it. Simple enough, but increases in complexity based on the amount of mutable data you have to keep track of. The functional way, instead, finds out how many times to repeat the key, creates a new array of letters with the key repeated the necessary amount, and then zips that with the original string using <code>modAddCapsLetters</code>. It&rsquo;s really a matter of preference, but I find the latter way of doing things conceptually simpler, and that helps a lot when building larger programs.</p>
+
+<p>Check out Underscore or Lo-Dash for implementations of many of these functions.</p>
+]]></content>
+  </entry>
+  
+</feed>

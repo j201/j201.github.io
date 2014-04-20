@@ -9,7 +9,7 @@
   <meta name="author" content="j201">
 
   
-  <meta name="description" content="Many functional programming languages such as Scheme, Clojure and Haskell are heavily based on list processing, which has proved to be a useful &hellip;">
+  <meta name="description" content="The concept of &lsquo;expressiveness&rsquo; is one that appears a lot in programming language debates. Broadly speaking, it means the ease with which &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -83,6 +83,211 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2014/04/20/expressing-yourself/">Expressing Yourself</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-04-20T10:42:00-04:00" pubdate data-updated="true">Apr 20<span>th</span>, 2014</time>
+        
+         | <a href="/blog/2014/04/20/expressing-yourself/#disqus_thread">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>The concept of &lsquo;expressiveness&rsquo; is one that appears a lot in programming language debates. Broadly speaking, it means the ease with which a language can express ideas. This is often taken to mean whether the language express common constructs prettily and tersely. But I feel that this isn&rsquo;t the whole story. For example, I&rsquo;m not a fan of &lsquo;expressive&rsquo; syntactical constructs like list comprehensions. Sure, they can express some common list operations in a readable manner, but they&rsquo;re inherently limited to the features supported by the syntax. Once you want to do an operation that isn&rsquo;t part of the list comprehension syntax, you have to fall back on the primitive constructs of the language, and you&rsquo;d better hope that they don&rsquo;t uglify the whole thing. I feel that an expressive language should go further.</p>
+
+<p>In particular, it bothers me to see people gushing about how the new Python-ish features of ES6 such as <code>for..of</code>, list comprehensions, and classes will finally make JS expressive. I disagree for a few reasons:</p>
+
+<ul>
+<li>Expressive programming is an approach to programming, not a characteristic of the language</li>
+<li>This approach is already possible and easy in JS</li>
+<li>Whether a language can be used expressively is far more determined by its powerful generic features, such as first-class functions and metaprogramming, than problem-specific syntactical constructs, like list comprehensions</li>
+</ul>
+
+
+<p>Instead, I would contend that expressive programming is about writing operations in a way that closely resembles a simple abstract description of each operation, using as few unimportant programming concerns as possible, and that this can be accomplished without highly specialized syntactical constructs.</p>
+
+<p>I&rsquo;ll show some code to explain. A simple example of a non-expressive construct is the for loop. For example, it&rsquo;s commonly used to do a thing for each element of an array:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">arr</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Do stuff with arr[i]</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Conceptually, we want to just do something for each element of an array, but the for loop forces us to deal instead with handling an index variable and using it. This is an example of <a href="http://en.wikipedia.org/wiki/Accidental_complexity">incidental complexity</a>: it&rsquo;s an implementation detail we don&rsquo;t care about and that gets in the way of expressing the idea we want to express. A more expressive formulation would be the following:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="nx">forEach</span><span class="p">(</span><span class="nx">arr</span><span class="p">,</span> <span class="nx">el</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Do stuff with el</span>
+</span><span class='line'><span class="p">});</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>You&rsquo;ll note that this is very close to our original statement of the problem: <em>do a thing for each element of an array</em>, just with the words rearranged. It&rsquo;s way more expressive than the for loop, and we can make it ourselves very easily without needing to wait for the language designers to add special syntactical constructs like <code>foreach</code> or <code>for of</code> loops:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">function</span> <span class="nx">forEach</span><span class="p">(</span><span class="nx">arr</span><span class="p">,</span> <span class="nx">fn</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">arr</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fn</span><span class="p">(</span><span class="nx">arr</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="c1">// arr.forEach can be used instead, but I&#39;m reimplementing it for the sake of argument</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>This shows why higher order functions are so important for expressive programming. They let you make abstractions like our forEach function that can abstract over behaviour, rather than just dealing with data structures. This means you have far more flexibility in the expressive constructs you use and you have access to a much wider variety of them without being limited by the syntactical constructs of the language. Any decent functional list library will have a range of functionality many times bigger than specialized list handling syntax can muster.</p>
+
+<p>What this example also shows is that expressive programming is not just a characteristic of the language, it&rsquo;s an approach the programmer must take. This is especially true in JavaScript, where you have access to both high-level functional approaches and low-level C-ish constructs like loops and switch statements. And I would point to Scheme as a great example of a language that despite having few specialized features can be programmed very expressively (see SICP and the beautiful functions therein).</p>
+
+<p>A good way to get used to this approach is to tackle problems in the following way:</p>
+
+<ul>
+<li>Determine an approach that will solve your problem in terms of simpler and more generic operations</li>
+<li>Write that approach in a straightforward expressive way, even if it means using functions you don&rsquo;t have yet</li>
+<li>Implement those functions the same way, writing them expressively in terms of smaller problems</li>
+<li>Continue until all of the necessary functions are implemented
+
+<ul>
+<li>In some cases, generic operations might need to use low-level approaches, like the <code>forEach</code> function above</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Let&rsquo;s do an example. <a href="http://projecteuler.net/problem=3">Project Euler problem 3</a> asks for the largest prime factor of 600851475143. I&rsquo;ll use ES6 arrow functions for readability, but these are easily translatable into normal JS functions.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">projectEuler3</span> <span class="o">=</span> <span class="p">()</span> <span class="o">=&gt;</span>
+</span><span class='line'>    <span class="nb">Math</span><span class="p">.</span><span class="nx">max</span><span class="p">.</span><span class="nx">apply</span><span class="p">(</span><span class="kc">null</span><span class="p">,</span> <span class="nx">primeFactors</span><span class="p">(</span><span class="mi">600851475143</span><span class="p">));</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So, we&rsquo;ve expressed exactly what we&rsquo;re looking for: the maximum element of the list of prime factors of 600851475143. Now, we need to implement primeFactors. Let&rsquo;s use the following algorithm:</p>
+
+<ul>
+<li>Find the first number from 2 to sqrt(x) that is a factor of x</li>
+<li>If such a number exists, return that number, along with the prime factors of x divided by that number</li>
+<li>Otherwise, return an array just with x (because x is prime)</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">primeFactors</span> <span class="o">=</span> <span class="nx">x</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">factor</span> <span class="o">=</span> <span class="nx">find</span><span class="p">(</span><span class="nx">range</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">sqrt</span><span class="p">(</span><span class="nx">x</span><span class="p">))</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+</span><span class='line'>        <span class="nx">n</span> <span class="o">=&gt;</span> <span class="nx">isFactor</span><span class="p">(</span><span class="nx">n</span><span class="p">,</span> <span class="nx">x</span><span class="p">));</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">factor</span> <span class="o">!==</span> <span class="kc">null</span> <span class="o">?</span>
+</span><span class='line'>        <span class="p">[</span><span class="nx">factor</span><span class="p">].</span><span class="nx">concat</span><span class="p">(</span><span class="nx">primeFactors</span><span class="p">(</span><span class="nx">x</span> <span class="o">/</span> <span class="nx">factor</span><span class="p">))</span> <span class="o">:</span>
+</span><span class='line'>        <span class="p">[</span><span class="nx">x</span><span class="p">];</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Again, really close to how we expressed the solution. But we used the functions <code>find</code>, <code>range</code>, and <code>isFactor</code>, so let&rsquo;s implement those. (The reason for adding one to the square root calculation is that range functions are generally inclusive on the lower bound and exclusive on the upper bound.)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">isFactor</span> <span class="o">=</span> <span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="nx">isInteger</span><span class="p">(</span><span class="nx">b</span> <span class="o">/</span> <span class="nx">a</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">isInteger</span> <span class="o">=</span> <span class="nx">x</span> <span class="o">=&gt;</span> <span class="nx">x</span> <span class="o">%</span> <span class="mi">1</span> <span class="o">===</span> <span class="mi">0</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A number is a factor of another if the result of their division is an integer, and a number is an integer if the number modulo one is zero. Reads like a book, although in reality you certainly wouldn&rsquo;t constantly reimplement these.</p>
+
+<p>Now we&rsquo;re down to more generic, simpler functions. Unfortunately, given the features JS provides, these have to be a bit more low-level. But they&rsquo;re still much shorter and easy to understand than the monolithic solutions you usually see for these kinds of problems. They&rsquo;re also generic enough to be gotten from libraries or put in a library and reused.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='javascript'><span class='line'><span class="kd">var</span> <span class="nx">find</span> <span class="o">=</span> <span class="p">(</span><span class="nx">arr</span><span class="p">,</span> <span class="nx">pred</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">arr</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">if</span> <span class="p">(</span><span class="nx">pred</span><span class="p">(</span><span class="nx">arr</span><span class="p">[</span><span class="nx">i</span><span class="p">]))</span>
+</span><span class='line'>            <span class="k">return</span> <span class="nx">arr</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+</span><span class='line'>    <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">range</span> <span class="o">=</span> <span class="p">(</span><span class="nx">from</span><span class="p">,</span> <span class="nx">to</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">result</span> <span class="o">=</span> <span class="p">[];</span>
+</span><span class='line'>    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">n</span> <span class="o">=</span> <span class="nx">from</span><span class="p">;</span> <span class="nx">n</span> <span class="o">&lt;</span> <span class="nx">to</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">result</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">n</span><span class="p">);</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">result</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>So here, we&rsquo;re using <code>for</code> loops to implement more the more abstract operations of finding the first element of a list that matches a predicate (a higher order function!) and getting a range of numbers. Any decent functional list library will provide similar functions, and <code>Array.prototype.find</code> is coming in ES6.</p>
+
+<p><a href="http://www.es6fiddle.net/hu8fuftc/">And we&rsquo;re done!</a></p>
+
+<p>So, this is how I see expressive programming. It&rsquo;s about coding your solutions as closely to the conceptual solutions as possible. This can be done with short, simple, pure functions and taking advantage of higher-order functions to make powerful, expressive abstractions. And it has many benefits:</p>
+
+<ul>
+<li>The problem-specific functions are short and easily understood</li>
+<li>Little incidental complexity</li>
+<li>Each function is easily testable and reusable</li>
+<li>Understanding and writing each function has a low cognitive load</li>
+<li>Low-level and difficult-to-read approaches are only used when really necessary</li>
+<li>Allows for easy construction of <a href="http://mitpress.mit.edu/sicp/full-text/sicp/book/node29.html">abstraction barriers</a></li>
+<li>No specific syntax needed</li>
+</ul>
+
+
+<p>So, as a JavaScript programmer, the features I am most excited about in ES6 are those that help with this goal, like arrow functions, which make functions easier to read and use, and the new HOFs coming to Array.prototype. Those are the features that really help expressive programming in JS, not limited syntactical additions.</p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1366,6 +1571,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2014/04/20/expressing-yourself/">Expressing Yourself</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2013/09/27/functional-list-processing-in-js/">Functional List Processing in JS</a>
       </li>
     
@@ -1381,10 +1590,6 @@
         <a href="/blog/2013/06/16/evil-js-macros/">Evil JS: Macros</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2013/06/15/hello-world/">Hello, World!</a>
-      </li>
-    
   </ul>
 </section>
 
@@ -1398,7 +1603,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2013 - j201 -
+  Copyright &copy; 2014 - j201 -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
