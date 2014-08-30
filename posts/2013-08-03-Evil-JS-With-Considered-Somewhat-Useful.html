@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Evil JS: With Considered Somewhat Useful</title>
+		<link href='//fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="/reset.css">
+		<link rel="stylesheet" href="/solarized_light.css">
+		<link rel="stylesheet" href="/styles.css">
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+		<link rel="icon" type="image/png" href="/favicon-196x196.png" sizes="196x196">
+		<link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+		<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+		<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+		<meta name="msapplication-TileColor" content="#00aba9">
+		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+	</head>
+	<body>
+		<header>
+			<div id="title-box"><a href="/" id="over-title">j201's<br>Blather</a></div><nav>
+				<div id="top-links">
+					<a href="/archives.html">Archives</a>
+					<a href="/projects.html">Projects</a>
+					<a href="https://github.com/j201">Github</a>
+				</div>
+			</nav>
+		</header>
+		<hr id="sidebar-topper">
+		<nav id="sidebar">
+			<a href="/" id="under-title">j201's<br>Blather</a>
+			<a href="/archives.html"><h2 class="sidebar-title">Posts</h2></a>
+			<ul id="post-list"><li><a class="post-list-entry" href="/posts/2014-07-11-TypeScript-The-Bad-Parts.html">TypeScript: The Bad Parts</a></li>
+<li><a class="post-list-entry" href="/posts/2014-04-20-Expressing-Yourself.html">Expressing Yourself</a></li>
+<li><a class="post-list-entry" href="/posts/2013-09-27-Functional-List-Processing-in-JS.html">Functional List Processing in JS</a></li>
+<li><a class="post-list-entry" href="/posts/2013-08-03-Evil-JS-With-Considered-Somewhat-Useful.html">Evil JS: With Considered Somewhat Useful</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-22-JS-Object-Literal-Inheritance.html">JS Object Literal Inheritance</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-16-Evil-JS-Macros.html">Evil JS: Macros</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-15-Hello,-World!.html">Hello, World!</a></li>
+</ul>
+		</nav><div id="content">
+			<div id="content-inner"><h1>Evil JS: With Considered Somewhat Useful</h1>
+<p><em>Note: Do not try this at work. It&#39;s not that bad but your coworkers and Douglas Crockford might get cross.</em></p>
+<p><code>with</code> statements are a little-used, oft-reviled, and underappreciated part of JavaScript. Basically, they allow you to write a statement, often a block, with the properties of a given object added to the scope. Here&#39;s an example:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> x = <span class="hljs-built_in">Math</span>.cos(<span class="hljs-number">3</span>/<span class="hljs-number">2</span> * <span class="hljs-built_in">Math</span>.PI);
+
+<span class="hljs-keyword">with</span>(<span class="hljs-built_in">Math</span>) {
+    <span class="hljs-keyword">var</span> y = cos(<span class="hljs-number">3</span>/<span class="hljs-number">2</span> * PI);
+}
+
+x; <span class="hljs-comment">// -1</span>
+y; <span class="hljs-comment">// -1</span>
+</code></pre>
+<p>The thing is, <code>with</code> statements are almost universally renounced in the JavaScript community. For example, you can read Douglas Crockford&#39;s attack on <code>with</code> from 2006 <a href="http://yuiblog.com/blog/2006/04/11/with-statement-considered-harmful/">here</a>. First of all, <code>with</code> can slow code down by making it difficult for the engine to know what variable is being referred to. But the main problem with <code>with</code> is that it complicates JS&#39;s notion of scope. Without <code>with</code>, the variables available in a scope are all of the global variables plus any variables made in local scopes using <code>var</code> or <code>function</code> statements. All of these variables can be both accessed and modified. But using <code>with</code> adds variables to the local scope that were not declared with a <code>var</code> or <code>function</code> statement and shadow those that were. Here&#39;s an example of the confusion that can be caused:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> obj = {
+    a : <span class="hljs-number">1</span>,
+    b : <span class="hljs-number">2</span>
+};
+
+<span class="hljs-keyword">with</span> (obj) {
+    a = <span class="hljs-number">3</span>;
+    <span class="hljs-keyword">var</span> b = <span class="hljs-number">4</span>;
+    b = <span class="hljs-number">5</span>;
+    c = <span class="hljs-number">6</span>;
+}
+</code></pre>
+<p>Now, what are the values of <code>obj.a</code>, <code>obj.b</code>, <code>obj.c</code>, <code>a</code>, <code>b</code>, and <code>c</code>? ANSWER: <span class="spoiler"><code>obj</code> is <code>{a : 3, b : 5}</code>, <code>a</code> isn&#39;t defined, <code>b</code> is 4, and <code>c</code> is 6.</span></p>
+<p>So there are good reasons to avoid <code>with</code>. In fact, ES5&#39;s strict mode prohibits its use. But the level of hatred and fear directed at it isn&#39;t proportional to its flaws and ignores the legitimate uses of with, which I&#39;ll cover now.</p>
+<h3 id="libraries-and-modules">Libraries and Modules</h3>
+<p>To use a library in JS, one generally has to constantly refer to its object when using its functions, for example using <code>jQuery.ajax</code> instead of <code>ajax</code>. This has led JS libraries to adopt short names such as <code>goog</code>, <code>_</code>, or <code>$</code> for somewhat easier typing, but with the costs of poor readability and losing useful short local variable names. Not adding the library functions to the scope is fine for libraries that you aren&#39;t using much, but can be inconvenient for libraries you&#39;re using heavily, which is why most programming languages provide a way to import the functions of a module into the current scope. Well, JS has one too:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Returns a random angle in radians from a circle divided into the given number of steps</span>
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">randomAngle</span><span class="hljs-params">(steps)</span> </span>{
+    <span class="hljs-keyword">with</span>(<span class="hljs-built_in">Math</span>) {
+        <span class="hljs-keyword">if</span> (!steps)
+            <span class="hljs-keyword">return</span> random() * <span class="hljs-number">2</span> * PI;
+        <span class="hljs-keyword">else</span>
+            <span class="hljs-keyword">return</span> floor(random() * steps) / steps * <span class="hljs-number">2</span> * PI;
+    }
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">randomAngle2</span><span class="hljs-params">(steps)</span> </span>{
+    <span class="hljs-keyword">if</span> (!steps)
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.random() * <span class="hljs-number">2</span> * <span class="hljs-built_in">Math</span>.PI;
+    <span class="hljs-keyword">else</span>
+        <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.floor(<span class="hljs-built_in">Math</span>.random() * steps) / steps * <span class="hljs-number">2</span> * <span class="hljs-built_in">Math</span>.PI;
+}
+</code></pre>
+<p>Yes, it&#39;s the same <code>Math</code> example. But it shows an important point: <code>with</code> can make dealing with libraries and built-in modules a lot easier. Unfortunately, with current attitudes towards <code>with</code>, we&#39;re stuck waiting until ES6 for a (hopefully) accepted way to do this.</p>
+<h3 id="block-scope">Block Scope</h3>
+<p>One oddity that makes JavaScript different from most C-style languages is the lack of block scope. Instead of local variables beings scoped to nearest block they&#39;re declared in (delimited by <code>{</code> and <code>}</code>), like in C or Java, JS variables are scoped to the nearest <code>function() {...}</code> in which they are declared. This is mostly fine (and in my opinion, not a problem at all if you use higher order array iterators), but can be occasionally problematic.</p>
+<p>A common issue in asynchronous JS is using callbacks in a loop:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++) {
+    setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{ <span class="hljs-built_in">console</span>.log(i); }, <span class="hljs-number">10</span>);
+}
+
+<span class="hljs-comment">// From console:</span>
+<span class="hljs-comment">// 5</span>
+<span class="hljs-comment">// 5</span>
+<span class="hljs-comment">// 5</span>
+<span class="hljs-comment">// 5</span>
+<span class="hljs-comment">// 5</span>
+</code></pre>
+<p>So, since the <code>for</code> loop finished executing before the callbacks were executed, the value of <code>i</code> is 5 every time.  In other languages, to get around this, you&#39;d just add a block-scoped variable for each iteration of the loop. In fact, this can be done right now in Firefox, but won&#39;t be standard until ES6 (see Solution 1 below). So, the standard solution is to wrap the whole thing in an <a href="http://en.wikipedia.org/wiki/IIFE">IIFE</a> (see Solution 2) which is widely supported, but adds a lot of visual noise. The other solution is to use <code>with</code> to emulate a block scope (Solution 3):</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Solution 1 - Elegant, but not widely supported</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++) {
+    <span class="hljs-keyword">let</span> j = i; <span class="hljs-comment">// A block scoped variable</span>
+    setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{ <span class="hljs-built_in">console</span>.log(j); }, <span class="hljs-number">10</span>);
+}
+
+<span class="hljs-comment">// Solution 2 - Idiomatic but ugly</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++) {
+    (<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(j)</span> </span>{
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{ <span class="hljs-built_in">console</span>.log(j); }, <span class="hljs-number">10</span>);
+    })(i);
+}
+
+<span class="hljs-comment">// Solution 3 - Widely supported and readable</span>
+<span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; <span class="hljs-number">5</span>; i++) {
+    <span class="hljs-keyword">with</span> ({j : i})
+        setTimeout(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">()</span> </span>{ <span class="hljs-built_in">console</span>.log(j); }, <span class="hljs-number">10</span>);
+}
+
+<span class="hljs-comment">// From console:</span>
+<span class="hljs-comment">// 0</span>
+<span class="hljs-comment">// 1</span>
+<span class="hljs-comment">// 2</span>
+<span class="hljs-comment">// 3</span>
+<span class="hljs-comment">// 4</span>
+</code></pre>
+<p>Basically, <code>with</code> lets you make block scoped variables. In fact, it&#39;s very similar to the <code>let</code> blocks that are coming in ES6:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> a;
+
+<span class="hljs-keyword">let</span> (b = <span class="hljs-number">2</span>, c = <span class="hljs-number">3</span>) {
+    a = b + c;
+}
+
+a; <span class="hljs-comment">// 5</span>
+
+<span class="hljs-keyword">with</span> ({b : <span class="hljs-number">4</span>, c : <span class="hljs-number">7</span>}) {
+    a = b + c;
+}
+
+a; <span class="hljs-comment">// 11</span>
+</code></pre>
+<p>So, while function scoped variables are usually adequate, <code>with</code> lets you use block scoping when you need it.</p>
+<h3 id="summary">Summary</h3>
+<h4 id="pros-">Pros:</h4>
+<ul>
+<li><code>with</code> makes it easier to work with libraries and modules.</li>
+<li><code>with</code> allows you to clearly emulate block scope.</li>
+<li>In general, using <code>with</code> sparingly can make your code easier to read and write.</li>
+</ul>
+<h4 id="cons-">Cons:</h4>
+<ul>
+<li>Using <code>with</code> poorly can result in unclear code.</li>
+<li><code>with</code> is rejected by most linters and style guides.</li>
+<li><code>with</code> can make code slower.</li>
+<li>ES5 strict mode forbids the use of <code>with</code>.</li>
+</ul>
+<h3 id="conclusion">Conclusion</h3>
+<p>I&#39;ve identified two cases where <code>with</code> can make for clearer code and emulate features that exist in most other languages. However, the JS community&#39;s aversion to <code>with</code> makes it almost unusable except in personal projects. Fortunately, both of its use cases will be replaced in ES6 by <code>let</code> and <code>import</code>, but for now, many coders are depriving themselves of a useful tool.So, don&#39;t use it at work, but if you have some hobby coding where readability is more important than speed, don&#39;t be too afraid to use <code>with</code>.</p>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+var disqus_shortname = 'j201'; // required: replace example with your forum shortname
+
+(function() {
+ var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+ dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+ (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+ })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+		</div>
+
+		<script type="text/javascript" src="/main.js"></script>
+
+		<!-- Disqus -->
+		<script type="text/javascript">
+		var disqus_shortname = 'j201_alex';
+
+		(function () {
+		 var s = document.createElement('script'); s.async = true;
+		 s.type = 'text/javascript';
+		 s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+		 (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+		 }());
+		</script>
+
+		<!-- GA -->
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-41719393-1', 'auto');
+		ga('send', 'pageview');
+
+		</script>
+	</body>
+</html>

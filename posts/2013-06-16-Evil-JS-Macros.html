@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Evil JS: Macros</title>
+		<link href='//fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="/reset.css">
+		<link rel="stylesheet" href="/solarized_light.css">
+		<link rel="stylesheet" href="/styles.css">
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+		<link rel="icon" type="image/png" href="/favicon-196x196.png" sizes="196x196">
+		<link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+		<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+		<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+		<meta name="msapplication-TileColor" content="#00aba9">
+		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+	</head>
+	<body>
+		<header>
+			<div id="title-box"><a href="/" id="over-title">j201's<br>Blather</a></div><nav>
+				<div id="top-links">
+					<a href="/archives.html">Archives</a>
+					<a href="/projects.html">Projects</a>
+					<a href="https://github.com/j201">Github</a>
+				</div>
+			</nav>
+		</header>
+		<hr id="sidebar-topper">
+		<nav id="sidebar">
+			<a href="/" id="under-title">j201's<br>Blather</a>
+			<a href="/archives.html"><h2 class="sidebar-title">Posts</h2></a>
+			<ul id="post-list"><li><a class="post-list-entry" href="/posts/2014-07-11-TypeScript-The-Bad-Parts.html">TypeScript: The Bad Parts</a></li>
+<li><a class="post-list-entry" href="/posts/2014-04-20-Expressing-Yourself.html">Expressing Yourself</a></li>
+<li><a class="post-list-entry" href="/posts/2013-09-27-Functional-List-Processing-in-JS.html">Functional List Processing in JS</a></li>
+<li><a class="post-list-entry" href="/posts/2013-08-03-Evil-JS-With-Considered-Somewhat-Useful.html">Evil JS: With Considered Somewhat Useful</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-22-JS-Object-Literal-Inheritance.html">JS Object Literal Inheritance</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-16-Evil-JS-Macros.html">Evil JS: Macros</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-15-Hello,-World!.html">Hello, World!</a></li>
+</ul>
+		</nav><div id="content">
+			<div id="content-inner"><h1>Evil JS: Macros</h1>
+<p><em>Note: Don&#39;t try this at work. This is bad code that shouldn&#39;t be used in production.</em></p>
+<p>As every JS hacker knows, <code>eval</code> is evil. It&#39;s slow, insecure, and generally unnecessary. The same goes for the <code>Function</code> constructor, which can, but shouldn&#39;t be used to create functions using strings to specify the arguments and body. But the badness of <code>eval</code> and <code>Function</code> doesn&#39;t mean you can&#39;t have some fun with them.</p>
+<p><code>Function.prototype.toString</code> is a function that returns the source code of the function it&#39;s called from. For example,</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> add = <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(x, y)</span> </span>{
+    <span class="hljs-keyword">return</span> x + y;
+};
+
+add.toString();
+<span class="hljs-comment">/*
+"function (x, y) {
+    return x + y;
+}"
+*/</span>
+</code></pre>
+<p>This is a feature that is mostly used in debugging, but you&#39;ll note that since we can get the function as a string, we can modify it and pass it to the Function constructor. This allows us to implement a feature JS has been sorely lacking, C-style macros!</p>
+<h3 id="simple-replacements">Simple Replacements</h3>
+<p>So the first thing to implement is simple replacements, like #defines without arguments. Let&#39;s use an object to represent these definitions:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> defines = {
+    PI : <span class="hljs-string">'3.14159'</span>,
+    E : <span class="hljs-string">'2.71828'</span>,
+    GREETING : <span class="hljs-string">'"Hello, "'</span>
+};
+</code></pre>
+<p>And now we can implement the first version of the JS preprocesser (let&#39;s call it the JSPP). It takes a definition object and a function and returns another function with the macro expansion applied:</p>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getBody</span><span class="hljs-params">(fn)</span> </span>{ <span class="hljs-comment">// Gets the body of a function as a string</span>
+    fnStr = fn.toString();
+    <span class="hljs-keyword">return</span> fnStr.slice(fnStr.indexOf(<span class="hljs-string">'{'</span>) + <span class="hljs-number">1</span>, fnStr.lastIndexOf(<span class="hljs-string">'}'</span>));
+};
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getArgs</span><span class="hljs-params">(fn)</span> </span>{ <span class="hljs-comment">// Gets the arguments of a function as an array of strings</span>
+    fnStr = fn.toString();
+    <span class="hljs-keyword">return</span> fnStr.slice(fnStr.indexOf(<span class="hljs-string">'('</span>) + <span class="hljs-number">1</span>, fnStr.indexOf(<span class="hljs-string">')'</span>)).split(<span class="hljs-string">','</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(x)</span> </span>{ <span class="hljs-keyword">return</span> x.trim(); });
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">JSPP</span><span class="hljs-params">(defines, fn)</span> </span>{
+    <span class="hljs-keyword">var</span> args = getArgs(fn);
+
+    <span class="hljs-comment">// Do the replacements</span>
+    <span class="hljs-keyword">var</span> body = <span class="hljs-built_in">Object</span>.keys(defines)
+        .reduce(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(text, replacement)</span> </span>{
+            <span class="hljs-comment">// Uses a RegExp to ensure that the macro name has non-word characters on either side</span>
+            <span class="hljs-comment">// Note that macro names should only use \w characters</span>
+            <span class="hljs-keyword">return</span> text.replace(<span class="hljs-built_in">RegExp</span>(<span class="hljs-string">'(\\W+)'</span> + key + <span class="hljs-string">'(\\W+)'</span>, <span class="hljs-string">'g'</span>), <span class="hljs-string">'$1'</span> + defines[key] + <span class="hljs-string">'$2'</span>);
+        }, getBody(fn));
+
+    <span class="hljs-comment">// Use the function constructor to rebuild the function</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Function</span>.apply(<span class="hljs-literal">null</span>, args.concat(body));
+}
+</code></pre>
+<p>Example usage:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> defines = {
+    PI : <span class="hljs-string">'3.14159'</span>,
+    E : <span class="hljs-string">'2.71828'</span>,
+    GREETING : <span class="hljs-string">'"Hello, "'</span>
+};
+
+<span class="hljs-keyword">var</span> doStuff = JSPP(defines, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(val)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-keyword">typeof</span> val === <span class="hljs-string">'number'</span> ? PI + E * val : GREETING + val;
+});
+
+doStuff(<span class="hljs-number">2</span>) <span class="hljs-comment">// 8.57815</span>
+doStuff(<span class="hljs-string">'Bob'</span>) <span class="hljs-comment">// Hello, Bob</span>
+doStuff.toString() <span class="hljs-comment">// function anonymous(val) { return typeof val === 'number' ? 3.14159 + 2.71828 * val : "Hello, " + val; }</span>
+</code></pre>
+<h3 id="function-like-macros">Function-like Macros</h3>
+<p>Okay, let&#39;s go one level deeper: macro arguments. We&#39;ll use the same syntax as the <code>Function</code> constructor, argument strings followed by body, except in an array:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> defines = {
+    ABS : [<span class="hljs-string">'x'</span>, <span class="hljs-string">'((x)&lt;0?-(x):(x))'</span>]
+};
+</code></pre>
+<p>And the new (buggy) JSPP implementation:</p>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getBody</span><span class="hljs-params">(fn)</span> </span>{ <span class="hljs-comment">// Gets the body of a function as a string</span>
+    fnStr = fn.toString();
+    <span class="hljs-keyword">return</span> fnStr.slice(fnStr.indexOf(<span class="hljs-string">'{'</span>) + <span class="hljs-number">1</span>, fnStr.lastIndexOf(<span class="hljs-string">'}'</span>));
+};
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">getArgs</span><span class="hljs-params">(fn)</span> </span>{ <span class="hljs-comment">// Gets the arguments of a function as an array of strings</span>
+    fnStr = fn.toString();
+    <span class="hljs-keyword">return</span> fnStr.slice(fnStr.indexOf(<span class="hljs-string">'('</span>) + <span class="hljs-number">1</span>, fnStr.indexOf(<span class="hljs-string">')'</span>)).split(<span class="hljs-string">','</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(x)</span> </span>{ <span class="hljs-keyword">return</span> x.trim(); });
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">JSPP</span><span class="hljs-params">(defines, fn)</span> </span>{
+    <span class="hljs-keyword">var</span> args = getArgs(fn);
+
+    <span class="hljs-comment">// Do the replacements</span>
+    <span class="hljs-keyword">var</span> body = <span class="hljs-built_in">Object</span>.keys(defines)
+        .reduce(<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-params">(text, key)</span> </span>{
+            <span class="hljs-keyword">if</span> (<span class="hljs-keyword">typeof</span> defines[key] === <span class="hljs-string">'string'</span>) { <span class="hljs-comment">// Do a simple replacement</span>
+                <span class="hljs-keyword">return</span> text.replace(<span class="hljs-built_in">RegExp</span>(<span class="hljs-string">'(\\W+)'</span> + key + <span class="hljs-string">'(\\W+)'</span>, <span class="hljs-string">'g'</span>), <span class="hljs-string">'$1'</span> + defines[key] + <span class="hljs-string">'$2'</span>);
+            } <span class="hljs-keyword">else</span> { <span class="hljs-comment">// Do a replacement with arguments</span>
+                <span class="hljs-comment">// First, convert the arguments into regex replacement patterns, such as $1 or $23</span>
+                <span class="hljs-keyword">var</span> macroBody = defines[key][defines[key].length - <span class="hljs-number">1</span>];
+                <span class="hljs-keyword">var</span> macroArgs = defines[key].slice(<span class="hljs-number">0</span>, -<span class="hljs-number">1</span>);
+                <span class="hljs-keyword">var</span> replacement = macroArgs.reduce(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(text, arg, index)</span> </span>{
+                    <span class="hljs-keyword">return</span> text.replace(<span class="hljs-built_in">RegExp</span>(arg, <span class="hljs-string">'g'</span>), <span class="hljs-string">'$'</span> + (index + <span class="hljs-number">1</span>));
+                }, macroBody);
+                <span class="hljs-comment">// Now, use RegExp capturing to apply the replacement</span>
+                <span class="hljs-comment">// Note that macro names can't have regex metacharacters, macro arguments cannot have commas</span>
+                <span class="hljs-comment">// and will often fail if they have ending parens, and there must be at least one argument.</span>
+                <span class="hljs-comment">// This is a messy, bad, but easy way of doing the replacement,</span>
+                <span class="hljs-comment">// which fits with the theme of the post, I feel.</span>
+                <span class="hljs-keyword">return</span> text.replace(<span class="hljs-built_in">RegExp</span>(key + <span class="hljs-comment">// The macro name</span>
+                                           <span class="hljs-string">'\\s*\\(\\s*(.+?)'</span> + <span class="hljs-comment">// The initial paren and first argument</span>
+                                           <span class="hljs-built_in">Array</span>(macroArgs.length).join(<span class="hljs-string">'\\s*,\\s*(.+?)'</span>) + <span class="hljs-comment">// The other args, separated by commas</span>
+                                           <span class="hljs-string">'\\s*\\)'</span>, <span class="hljs-comment">// The final paren</span>
+                                           <span class="hljs-string">'g'</span>), replacement);
+            }
+        }, getBody(fn));
+    <span class="hljs-comment">// Use the function constructor to rebuild the function</span>
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Function</span>.apply(<span class="hljs-literal">null</span>, args.concat(body));
+}
+</code></pre>
+<p>Example usage:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> defines = {
+    PI : <span class="hljs-string">'3.14159'</span>,
+    E : <span class="hljs-string">'2.71828'</span>,
+    ABS : [<span class="hljs-string">'x'</span>, <span class="hljs-string">'((x)&lt;0?-(x):(x))'</span>],
+    RESISTORS_PARALLEL : [<span class="hljs-string">'a'</span>, <span class="hljs-string">'b'</span>, <span class="hljs-string">'((a)*(b)/((a)+(b)))'</span>]
+};
+
+<span class="hljs-keyword">var</span> doStuff = JSPP(defines, <span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(val)</span> </span>{
+    <span class="hljs-keyword">return</span> RESISTORS_PARALLEL(PI, E) * ABS(val);
+});
+
+doStuff(<span class="hljs-number">2</span>) <span class="hljs-comment">// 2.9146452959536644</span>
+doStuff(-<span class="hljs-number">2</span>) <span class="hljs-comment">// 2.9146452959536644</span>
+doStuff.toString()
+<span class="hljs-comment">/*
+function anonymous(val) {
+    return ((3.14159)*(2.71828)/((3.14159)+(2.71828))) * ((val)&lt;0?-(val):(val));
+}
+*/</span>
+</code></pre>
+<p>So there you go, everyone&#39;s favourite preprocesser partially ported to JavaScript! And while this is not a good use of <code>Function</code> and <code>Function.prototype.toString</code>, it does show their power. They both have legitimate purposes, and if you&#39;re not afraid to go down that road, you can do some pretty wacky stuff with them.</p>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+var disqus_shortname = 'j201'; // required: replace example with your forum shortname
+
+(function() {
+ var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+ dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+ (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+ })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+		</div>
+
+		<script type="text/javascript" src="/main.js"></script>
+
+		<!-- Disqus -->
+		<script type="text/javascript">
+		var disqus_shortname = 'j201_alex';
+
+		(function () {
+		 var s = document.createElement('script'); s.async = true;
+		 s.type = 'text/javascript';
+		 s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+		 (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+		 }());
+		</script>
+
+		<!-- GA -->
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-41719393-1', 'auto');
+		ga('send', 'pageview');
+
+		</script>
+	</body>
+</html>

@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>Functional List Processing in JS</title>
+		<link href='//fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="/reset.css">
+		<link rel="stylesheet" href="/solarized_light.css">
+		<link rel="stylesheet" href="/styles.css">
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+		<link rel="icon" type="image/png" href="/favicon-196x196.png" sizes="196x196">
+		<link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+		<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+		<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+		<meta name="msapplication-TileColor" content="#00aba9">
+		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+	</head>
+	<body>
+		<header>
+			<div id="title-box"><a href="/" id="over-title">j201's<br>Blather</a></div><nav>
+				<div id="top-links">
+					<a href="/archives.html">Archives</a>
+					<a href="/projects.html">Projects</a>
+					<a href="https://github.com/j201">Github</a>
+				</div>
+			</nav>
+		</header>
+		<hr id="sidebar-topper">
+		<nav id="sidebar">
+			<a href="/" id="under-title">j201's<br>Blather</a>
+			<a href="/archives.html"><h2 class="sidebar-title">Posts</h2></a>
+			<ul id="post-list"><li><a class="post-list-entry" href="/posts/2014-07-11-TypeScript-The-Bad-Parts.html">TypeScript: The Bad Parts</a></li>
+<li><a class="post-list-entry" href="/posts/2014-04-20-Expressing-Yourself.html">Expressing Yourself</a></li>
+<li><a class="post-list-entry" href="/posts/2013-09-27-Functional-List-Processing-in-JS.html">Functional List Processing in JS</a></li>
+<li><a class="post-list-entry" href="/posts/2013-08-03-Evil-JS-With-Considered-Somewhat-Useful.html">Evil JS: With Considered Somewhat Useful</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-22-JS-Object-Literal-Inheritance.html">JS Object Literal Inheritance</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-16-Evil-JS-Macros.html">Evil JS: Macros</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-15-Hello,-World!.html">Hello, World!</a></li>
+</ul>
+		</nav><div id="content">
+			<div id="content-inner"><h1>Functional List Processing in JS</h1>
+<p>Many functional programming languages such as Scheme, Clojure and Haskell are heavily based on list processing, which has proved to be a useful approach for dealing with data and code alike. In particular, they tend to have a wide range of useful list processing functions that can simplify the use of lists while allowing them to replace constructs like loops. While JS doesn&#39;t share the elegance or theoretical purity of such languages, it took some cues from them in ES5 when the <code>map</code>, <code>reduce</code>, <code>reduceRight</code>, <code>some</code>, <code>every</code>, and <code>filter</code> functions were added to <code>Array.prototype</code>. These higher-order functions added flexibility, better scoping, and simplicity to programming techniques that were usually previously accomplished with <code>for</code> loops. JS is still lacking many of the useful features that functional languages use for creating and processing lists, but many of them can be implemented fairly easily in order to make it easier to use arrays and banish loops once and for all.</p>
+<h3 id="-range-or-list-comprehensions-without-the-sugar"><code>range</code>, or list comprehensions without the sugar</h3>
+<p>Languages like Python and CoffeeScript have <a href="http://en.wikipedia.org/wiki/List_comprehension">list comprehensions</a>: terse syntaxes for making lists with given ranges and constraints. However, I agree with the LISP philosophy that you shouldn&#39;t solve such simple problems by throwing more syntax at them - existing syntax should be used instead. For example, Clojure uses a couple of regular functions to do the same thing: whereas you could write <code>(i * 5 for i in [1..5])</code> in CoffeeScript, the equivalent Clojure would look like <code>(for [i (range 1 6)] (* i 5))</code>, which justs uses function calls and a binding form, maintaining syntactic simplicity. Well, the same approach can be applied in JavaScript with the following helper function:</p>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">range</span><span class="hljs-params">(startOrEnd, end, step)</span> </span>{
+    <span class="hljs-keyword">var</span> start;
+    <span class="hljs-keyword">if</span> (<span class="hljs-built_in">arguments</span>.length &gt; <span class="hljs-number">1</span>) {
+        start = startOrEnd;
+    } <span class="hljs-keyword">else</span> {
+        start = <span class="hljs-number">0</span>;
+        end = startOrEnd;
+    }
+    step = step || <span class="hljs-number">1</span>;
+
+    <span class="hljs-keyword">if</span> (step &gt; <span class="hljs-number">0</span> &amp;&amp; start &gt; end || step &lt; <span class="hljs-number">0</span> &amp;&amp; start &lt; end)
+        <span class="hljs-keyword">return</span> [];
+
+    <span class="hljs-keyword">var</span> result = [];
+    <span class="hljs-keyword">if</span> (step &gt; <span class="hljs-number">0</span>)
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = start; i &lt; end; i += step)
+            result.push(i);
+    <span class="hljs-keyword">else</span>
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = start; i &gt; end; i += step)
+            result.push(i);
+    <span class="hljs-keyword">return</span> result;
+}
+</code></pre>
+<p>This function acts more or less the same way as <a href="http://clojuredocs.org/clojure_core/clojure.core/range">Clojure&#39;s range function</a>:</p>
+<pre><code class="lang-javascript">range(<span class="hljs-number">5</span>); <span class="hljs-comment">// [0, 1, 2, 3, 4]</span>
+range(-<span class="hljs-number">2</span>, <span class="hljs-number">3</span>); <span class="hljs-comment">// [-2, -1, 0, 1, 2]</span>
+range(<span class="hljs-number">10</span>, <span class="hljs-number">0</span>, -<span class="hljs-number">1</span>); <span class="hljs-comment">// [10, 9, 8, 7, 6, 5, 4, 3, 2, 1]</span>
+</code></pre>
+<p>So, first of all, this pretty much replaces <code>for</code> loops. Instead of writing <code>for (var i = 0; i &lt; 10; i += 2) { ...</code>, you can write <code>range(0, 10, 2).forEach(function(i) { ...</code>, which is clearer in my opinion and carries other stylistic benefits. Also note that if you use <code>map</code> instead of <code>forEach</code>, you can get an array of results as well as getting the for loop behaviour, which can be very convenient and which brings us to our final goal of emulating list comprehensions:</p>
+<pre><code class="lang-javascript">range(<span class="hljs-number">1</span>, <span class="hljs-number">6</span>).map(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(x)</span> </span>{ <span class="hljs-keyword">return</span> x * <span class="hljs-number">5</span>;}); <span class="hljs-comment">// Tadaa! [5, 10, 15, 20, 25]</span>
+</code></pre>
+<p>That&#39;s nice and useful, but not very pretty. Fortunately ES6 arrow functions will make it look much nicer. (ES6 also has list comprehensions, which I don&#39;t think are really necessary, but ES6 is proving to be a mish-mash of features anyway).</p>
+<pre><code class="lang-javascript">range(<span class="hljs-number">1</span>, <span class="hljs-number">6</span>).map(x =&gt; x * <span class="hljs-number">5</span>); <span class="hljs-comment">// [5, 10, 15, 20, 25]</span>
+</code></pre>
+<p>And there you have it: the <code>for</code> loop and loop comprehension killer. You&#39;ll occasionally see hacks like <code>Array.apply(null, Array(10)).map(Number.call, Number)</code> to get a range on the fly, but you&#39;re much better off doing it properly with a helper function or using one from a library like Underscore.</p>
+<p>More than any other function on this page, I&#39;d like to see this implemented as a native function, <code>Array.range</code> perhaps. It&#39;s really the last piece in the puzzle to making full use of <code>forEach</code>, <code>map</code>, etc.</p>
+<h3 id="zipping-around">Zipping around</h3>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">zipWith</span><span class="hljs-params">(fn)</span> </span>{
+    <span class="hljs-keyword">var</span> arrays = <span class="hljs-built_in">Array</span>.prototype.slice.call(<span class="hljs-built_in">arguments</span>, <span class="hljs-number">1</span>);
+    <span class="hljs-keyword">if</span> (arrays.length &lt; <span class="hljs-number">2</span>)
+        <span class="hljs-keyword">throw</span> <span class="hljs-keyword">new</span> <span class="hljs-built_in">Error</span>(<span class="hljs-string">'zip requires at least 2 arrays'</span>);
+
+    <span class="hljs-keyword">var</span> length = arrays.slice(<span class="hljs-number">1</span>).reduce(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(minLength, arr)</span> </span>{
+        <span class="hljs-keyword">return</span> arr.length &lt; minLength ? arr.length : minLength;
+    }, arrays[<span class="hljs-number">0</span>].length);
+
+    <span class="hljs-keyword">var</span> result = [];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
+        result.push(fn.apply(<span class="hljs-literal">null</span>, arrays.map(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(arr)</span> </span>{
+            <span class="hljs-keyword">return</span> arr[i];
+        })));
+    }
+    <span class="hljs-keyword">return</span> result;
+
+    <span class="hljs-comment">/* 
+     * If you have range(...), this last section could be expressed more cleanly as
+     * return range(length).map(function(i) {
+     *     return fn.apply(null, arrays.map(function(arr) {
+     *         return arr[i];
+     *     }));
+     * });
+     */</span>
+}
+</code></pre>
+<p>This one is in Haskell and Clojure (as <code>map</code>). It takes a function as its first parameter and at least two arrays as subsequent parameters, then it returns an array of the results of calling the function with the array elements at the corresponding indices as arguments. So for example, if you called <code>zipWith(fn, arr1, arr2)</code>, it would return <code>[fn(arr1[0], arr2[0]), fn(arr1[1], arr2[1]), fn(arr1[2], arr2[2]), ...]</code>. <code>zipWith.apply(...)</code> is especially useful for working with matrices, but it has a range of other uses. Here are a couple of practical examples:</p>
+<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> arr1 = [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>], arr2 = [<span class="hljs-number">6</span>, <span class="hljs-number">2</span>, -<span class="hljs-number">1</span>];
+
+<span class="hljs-comment">// Sum the corresponding elements of the arrays</span>
+zipWith(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(a, b)</span> </span>{ <span class="hljs-keyword">return</span> a + b; }, arr1, arr2); <span class="hljs-comment">// [7, 4, 2]</span>
+
+<span class="hljs-comment">// Test if the arrays are equal</span>
+zipWith(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(a, b)</span> </span>{ <span class="hljs-keyword">return</span> a === b; }, arr1, arr2).every(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(x)</span> </span>{ <span class="hljs-keyword">return</span> x; }); <span class="hljs-comment">// false</span>
+</code></pre>
+<p>And while we&#39;re talking about array equality,</p>
+<h3 id="array-equality">Array equality</h3>
+<p>When you&#39;re using arrays as your main data structure, you need to be able to check whether one array has the same values as another. There are good reasons for arrays to be treated as unique for comparison operators, but you <em>will</em> need an equation like this in order to do functional-style list processing. Note that this uses deep equality testing for arrays and shallow equality testing for other objects.</p>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">arraysEqual</span><span class="hljs-params">(arr1, arr2)</span> </span>{
+    <span class="hljs-keyword">if</span> (arr1.length != arr2.length)
+        <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+    <span class="hljs-keyword">if</span> (arr1 == <span class="hljs-literal">null</span> || arr2 == <span class="hljs-literal">null</span>)
+        <span class="hljs-keyword">return</span> arr1 === arr2;
+
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; arr1.length; i++) {
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Array</span>.isArray(arr1[i]) &amp;&amp; <span class="hljs-built_in">Array</span>.isArray(arr2[i])) {
+            <span class="hljs-keyword">if</span> (!arraysEqual(arr1[i], arr2[i]))
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        } <span class="hljs-keyword">else</span> {
+            <span class="hljs-keyword">if</span> (arr1[i] !== arr2[i])
+                <span class="hljs-keyword">return</span> <span class="hljs-literal">false</span>;
+        }
+    }
+    <span class="hljs-keyword">return</span> <span class="hljs-literal">true</span>;
+}
+
+arraysEqual([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>]], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, <span class="hljs-number">5</span>]]); <span class="hljs-comment">// true</span>
+arraysEqual([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>]], [<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, <span class="hljs-number">3</span>, <span class="hljs-number">4</span>]); <span class="hljs-comment">// false</span>
+</code></pre>
+<h3 id="repetition">Repetition</h3>
+<p><code>range</code> is by far the most useful list builder function, but sometimes it comes in handy to make a list that&#39;s just the same thing over and over again:</p>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">repeat</span><span class="hljs-params">(times, value)</span> </span>{
+    <span class="hljs-keyword">var</span> result = [];
+    <span class="hljs-keyword">while</span> (times &gt; <span class="hljs-number">0</span>) {
+        result.push(value);
+        times--;
+    }
+    <span class="hljs-keyword">return</span> result;
+}
+</code></pre>
+<p>And some examples:</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Multiplying a string</span>
+<span class="hljs-keyword">var</span> googol = <span class="hljs-string">'1'</span> + repeat(<span class="hljs-number">100</span>, <span class="hljs-string">'0'</span>).join(<span class="hljs-string">''</span>);
+<span class="hljs-comment">// "10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000"</span>
+
+
+<span class="hljs-comment">// Roll 10d6</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">rollDie</span><span class="hljs-params">(sides)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">Math</span>.floor(<span class="hljs-built_in">Math</span>.random() * sides) + <span class="hljs-number">1</span>;
+}
+
+repeat(<span class="hljs-number">10</span>, <span class="hljs-number">6</span>).map(rollDie).reduce(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(a, b)</span> </span>{ <span class="hljs-keyword">return</span> a + b; }); <span class="hljs-comment">// 38 (for example)</span>
+</code></pre>
+<h3 id="nesting-and-unnesting">Nesting and unnesting</h3>
+<p>Last of all, it&#39;s often useful to deal with lists within lists, so here are a couple of functions for that. This first one returns a list split up into a sublists of a given length.</p>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">partition</span><span class="hljs-params">(n, array)</span> </span>{
+    <span class="hljs-keyword">var</span> result = [];
+    <span class="hljs-keyword">var</span> length = <span class="hljs-built_in">Math</span>.floor(array.length / n);
+
+    <span class="hljs-comment">// Again, range would make this part nicer</span>
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; length; i++) {
+        result.push([]);
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> j = <span class="hljs-number">0</span>; j &lt; n; j++) {
+            result[i].push(array[n * i + j]);
+        }
+    }
+    <span class="hljs-keyword">return</span> result;
+}
+
+partition(<span class="hljs-number">3</span>, range(<span class="hljs-number">9</span>)); <span class="hljs-comment">// [[0, 1, 2], [3, 4, 5], [6, 7, 8]]</span>
+
+<span class="hljs-comment">// Make an empty 4*4 matrix</span>
+partition(<span class="hljs-number">4</span>, repeat(<span class="hljs-number">16</span>, <span class="hljs-number">0</span>)); <span class="hljs-comment">// [[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]]</span>
+</code></pre>
+<p>And this takes a nested list and flattens it into a single layer.</p>
+<pre><code class="lang-javascript"><span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">flatten</span><span class="hljs-params">(arr)</span> </span>{
+    <span class="hljs-keyword">var</span> result = [];
+    arr.forEach(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(el)</span> </span>{
+        <span class="hljs-keyword">if</span> (<span class="hljs-built_in">Array</span>.isArray(el))
+            result = result.concat(flatten(el)); <span class="hljs-comment">// w00t recursion</span>
+        <span class="hljs-keyword">else</span>
+            result.push(el);
+    });
+    <span class="hljs-keyword">return</span> result;
+}
+
+flatten([<span class="hljs-number">1</span>, <span class="hljs-number">2</span>, [<span class="hljs-number">3</span>, <span class="hljs-number">4</span>, [[[<span class="hljs-number">5</span>]]]]]); <span class="hljs-comment">// [1, 2, 3, 4, 5]</span>
+
+flatten(repeat(<span class="hljs-number">4</span>, range(<span class="hljs-number">2</span>))); <span class="hljs-comment">// [0, 1, 0, 1, 0, 1, 0, 1]</span>
+</code></pre>
+<h3 id="conclusion">Conclusion</h3>
+<p>The point of these functions isn&#39;t just to make list processing a bit less wordy; they allow you to manipulate lists in a completely different way. Instead of dealing with lists in they way you generally see in the functions themselves - changing an index variable to represent the current element, pushing and changing arrays of results, etc. - you can express most list functions in a single statement, with no variable modifications whatsoever. Then, you can build up list operations and eventually entire programs by combining such functions into other functions, without having to mentally keep track of variables changing state. It takes some getting used to, but it&#39;s a great way to program.</p>
+<p>Here&#39;s an example: the <a href="http://en.wikipedia.org/wiki/Vigen%C3%A8re_cipher">Vigenère cipher</a>. Basically, it&#39;s a Caesar cipher, but each letter is shifted by a different amount depending on a key, which if too short is repeated.</p>
+<pre><code class="lang-javascript"><span class="hljs-comment">// Does modular addition of capital letters, e.g., Y + D = B</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">modAddCapsLetters</span><span class="hljs-params">(a, b)</span> </span>{
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">String</span>.fromCharCode((a.charCodeAt(<span class="hljs-number">0</span>) + b.charCodeAt(<span class="hljs-number">0</span>) - <span class="hljs-number">65</span> * <span class="hljs-number">2</span>) % <span class="hljs-number">26</span> + <span class="hljs-number">65</span>);
+}
+
+<span class="hljs-comment">// The imperative way</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">vigenereImp</span><span class="hljs-params">(str, key)</span> </span>{
+    <span class="hljs-keyword">var</span> keyPos = <span class="hljs-number">0</span>, result = <span class="hljs-string">""</span>;
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>; i &lt; str.length; i++) {
+        result += modAddCapsLetters(str.charAt(i), key[keyPos]));
+        keyPos++;
+        <span class="hljs-keyword">if</span> (keyPos &gt;= key.length)
+            keyPos = <span class="hljs-number">0</span>;
+    }
+    <span class="hljs-keyword">return</span> result;
+}
+
+<span class="hljs-comment">// The functional way</span>
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">vigenere</span><span class="hljs-params">(str, key)</span> </span>{
+    <span class="hljs-keyword">var</span> keyRepeats = <span class="hljs-built_in">Math</span>.ceil(str.length / key.length),
+        repeatedKey = flatten(repeat(keyRepeats, key.split(<span class="hljs-string">''</span>)));
+    <span class="hljs-keyword">return</span> zipWith(modAddCapsLetters, str.split(<span class="hljs-string">''</span>), repeatedKey).join(<span class="hljs-string">''</span>);
+}
+
+vigenere(<span class="hljs-string">"LOOPSAREFORTHEWEAK"</span>, <span class="hljs-string">"LISPY"</span>);
+<span class="hljs-comment">// "WWGEQLZWUMCBZTUPIC"</span>
+</code></pre>
+<p>So the imperative way does it step by step. It creates a variable <code>i</code> that increases for each letter, a variable <code>keyPos</code> that increases for each letter but gets reset to 0 once it&#39;s equal to the key length, and then shifts the letter in the input string by the given letter in the key. It concatenates each one to the end of a result string then returns it. Simple enough, but increases in complexity based on the amount of mutable data you have to keep track of. The functional way, instead, finds out how many times to repeat the key, creates a new array of letters with the key repeated the necessary amount, and then zips that with the original string using <code>modAddCapsLetters</code>. It&#39;s really a matter of preference, but I find the latter way of doing things conceptually simpler, and that helps a lot when building larger programs.</p>
+<p>Check out Underscore or Lo-Dash for implementations of many of these functions.</p>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+var disqus_shortname = 'j201'; // required: replace example with your forum shortname
+
+(function() {
+ var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+ dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+ (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+ })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+		</div>
+
+		<script type="text/javascript" src="/main.js"></script>
+
+		<!-- Disqus -->
+		<script type="text/javascript">
+		var disqus_shortname = 'j201_alex';
+
+		(function () {
+		 var s = document.createElement('script'); s.async = true;
+		 s.type = 'text/javascript';
+		 s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+		 (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+		 }());
+		</script>
+
+		<!-- GA -->
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-41719393-1', 'auto');
+		ga('send', 'pageview');
+
+		</script>
+	</body>
+</html>

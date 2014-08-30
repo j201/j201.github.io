@@ -1,0 +1,238 @@
+* {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+a {
+  text-decoration: none;
+  color: inherit;
+}
+html,
+body {
+  min-width: 500px;
+  height: 100%;
+}
+body {
+  font-family: "Source Sans Pro", sans-serif;
+  background-color: #009b86;
+}
+code {
+  color: #660088;
+  font-family: "Consolas", "Inconsolata", Menlo, Monaco, "Andale Mono", "lucida console", "Courier New", monospace;
+}
+pre {
+  overflow: auto;
+  background-color: #fdf6e3;
+  border: 1px solid #bcaf8b;
+  padding: 3px 5px 5px 5px;
+  font-family: Consolas, Inconsolata, Menlo, Monaco, "Andale Mono", "Lucida Console", "Courier New", monospace;
+}
+pre > code {
+  color: black;
+  font-size: 14px;
+}
+header {
+  height: 120px;
+  background-color: #009b86;
+  font-family: "Roboto Slab", sans-serif;
+}
+header nav {
+  display: inline-block;
+  position: absolute;
+  color: rgba(255, 255, 255, 0.8);
+  text-align: center;
+  font-size: 1.7em;
+  top: 0;
+  right: 0;
+  height: 120px;
+  width: calc(100% - 200px);
+}
+header nav > div {
+  position: absolute;
+  right: 10%;
+  bottom: 40px;
+}
+header > nav a {
+  padding: 4px 8px;
+  transition: background-color 0.2s;
+  margin-right: 20px;
+  margin-top: 10px;
+  display: inline-block;
+}
+header > nav a:last-child {
+  margin-right: 0;
+}
+header > nav a:hover {
+  background-color: #00ceb2;
+  box-shadow: 0px 0px 2px #00ceb2;
+}
+p {
+  margin-bottom: 20px;
+}
+#title-box {
+  height: 120px;
+  font-weight: bold;
+  width: 200px;
+  background-color: #f2f2f2;
+  position: absolute;
+  clip: rect(0, 200px, 120px, 0);
+  z-index: 20;
+}
+#sidebar-topper {
+  width: 200px;
+  margin: 0;
+  position: fixed;
+  top: 118px;
+  z-index: 1;
+  border: none;
+  height: 1px;
+  background-color: rgba(255, 255, 255, 0.8);
+}
+#sidebar {
+  width: 200px;
+  color: rgba(255, 255, 255, 0.8);
+  padding: 5px 7px;
+  position: fixed;
+  overflow: hidden;
+}
+#sidebar h2 {
+  font-family: "Roboto Slab", sans-serif;
+  font-size: 1.6em;
+  margin: 4px 4px 8px 6px;
+}
+#sidebar li {
+  margin-bottom: 6px;
+  font-size: 0.95em;
+}
+#sidebar li > a {
+  color: white;
+  display: inline-block;
+  padding: 2px 5px;
+  width: 100%;
+}
+#sidebar li > a:hover {
+  background-color: #00b49c;
+}
+#over-title,
+#under-title {
+  text-align: right;
+  font-weight: bold;
+  font-size: 2em;
+  position: fixed;
+  top: 38px;
+  left: 65px;
+}
+#over-title {
+  color: #009b86;
+  z-index: 20;
+  position: fixed;
+}
+a#under-title {
+  color: rgba(255, 255, 255, 0.8);
+  font-family: "Roboto Slab", sans-serif;
+  width: auto;
+  padding: 0;
+  z-index: 10;
+}
+a#under-title:hover {
+  background-color: transparent;
+}
+#content {
+  background-color: #f2f2f2;
+  width: calc(100% - 200px);
+  min-height: calc(100% - 120px);
+  position: absolute;
+  top: 120px;
+  right: 0;
+  padding: 20px;
+  padding-right: 30px;
+  font-size: 15px;
+  line-height: 1.4;
+}
+#content h1,
+#content h2 {
+  color: #00685a;
+  font-size: 2.2em;
+  display: inline-block;
+}
+#content h1 {
+  font-size: 2.5em;
+}
+#content h3 {
+  color: #00685a;
+  font-size: 1.5em;
+  margin-top: 10px;
+  margin-bottom: 8px;
+}
+#content h4 {
+  color: #00685a;
+  font-size: 1.3em;
+  margin-bottom: 3px;
+}
+#content li {
+  list-style-type: disc;
+  margin: 5px 0 5px 20px;
+}
+#content-inner {
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#content-inner h1 + p {
+  margin-top: 10px;
+}
+#content-inner p > a {
+  color: #003388;
+  text-decoration: underline;
+}
+#content .post-link h2 {
+  margin-bottom: 0;
+}
+.project-desc {
+  margin-top: 2px;
+}
+.post {
+  margin-bottom: 16px;
+}
+.post hr {
+  height: 1px;
+  border: 0;
+  background-color: #00685a;
+  margin-top: 27px;
+}
+.date {
+  font-size: 0.9em;
+}
+.date-comments {
+  color: #009b86;
+  font-size: 0.9em;
+  margin-bottom: 15px;
+  display: inline-block;
+}
+.spoiler:not(:hover),
+.spoiler:not(:hover) code {
+  background-color: #000;
+  color: #000;
+}
+#content .post-desc {
+  margin: 0 0 5px 0;
+}
+@media (max-width: 700px) {
+  #content {
+    left: 0;
+    min-width: 500px;
+    width: 100%;
+  }
+  #content-inner {
+    margin: 0 20px;
+  }
+  #title-box,
+  a#under-title,
+  #sidebar-topper {
+    display: none;
+  }
+  header > nav {
+    left: 0;
+    min-width: 500px;
+    width: 100%;
+  }
+}

@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>TypeScript: The Bad Parts</title>
+		<link href='//fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="/reset.css">
+		<link rel="stylesheet" href="/solarized_light.css">
+		<link rel="stylesheet" href="/styles.css">
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+		<link rel="icon" type="image/png" href="/favicon-196x196.png" sizes="196x196">
+		<link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+		<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+		<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+		<meta name="msapplication-TileColor" content="#00aba9">
+		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+	</head>
+	<body>
+		<header>
+			<div id="title-box"><a href="/" id="over-title">j201's<br>Blather</a></div><nav>
+				<div id="top-links">
+					<a href="/archives.html">Archives</a>
+					<a href="/projects.html">Projects</a>
+					<a href="https://github.com/j201">Github</a>
+				</div>
+			</nav>
+		</header>
+		<hr id="sidebar-topper">
+		<nav id="sidebar">
+			<a href="/" id="under-title">j201's<br>Blather</a>
+			<a href="/archives.html"><h2 class="sidebar-title">Posts</h2></a>
+			<ul id="post-list"><li><a class="post-list-entry" href="/posts/2014-07-11-TypeScript-The-Bad-Parts.html">TypeScript: The Bad Parts</a></li>
+<li><a class="post-list-entry" href="/posts/2014-04-20-Expressing-Yourself.html">Expressing Yourself</a></li>
+<li><a class="post-list-entry" href="/posts/2013-09-27-Functional-List-Processing-in-JS.html">Functional List Processing in JS</a></li>
+<li><a class="post-list-entry" href="/posts/2013-08-03-Evil-JS-With-Considered-Somewhat-Useful.html">Evil JS: With Considered Somewhat Useful</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-22-JS-Object-Literal-Inheritance.html">JS Object Literal Inheritance</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-16-Evil-JS-Macros.html">Evil JS: Macros</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-15-Hello,-World!.html">Hello, World!</a></li>
+</ul>
+		</nav><div id="content">
+			<div id="content-inner"><h1>TypeScript: The Bad Parts</h1>
+<p><a href="http://www.typescriptlang.org/">TypeScript</a> is Microsoft&#39;s attempt to bring type checking to the Wild West of JS. It also brings features such as arrow functions and &quot;classes&quot; inspired by ES6 spec drafts. After working with it for a while, I feel it has some nice bits, but on the whole it&#39;s sorely lacking. It seems to be trying to turn JS into C# while ignoring the drawbacks and limitations of that approach. Here I&#39;d like to go through the major features of TypeScript and identify how it got them wrong.</p>
+<h3 id="inexpressive-types">Inexpressive Types</h3>
+<p>Despite having structural types (yay!), TS has a remarkably inflexible type system. It&#39;s lacking many powerful features that are common in modern structural type systems, which reduces its ability to model and verify programs. However, TypeScript has an even greater requirement in that it must be able to describe the types of existing JS code, which includes functions that wouldn&#39;t be allowed in many strongly typed languages. Even though this is difficult, TS falls short.</p>
+<h4 id="union-types">Union Types</h4>
+<p>The feature I find the most lacking is union types: where a value can be considered to be one of two types. This is so common in JS that I can&#39;t understand why TypeScript wouldn&#39;t include it. Sure, you can implement an <code>Either&lt;TLeft, TRight&gt;</code> type in TS, but the lack of native support forces the use of <code>any</code> <a href="https://github.com/borisyankov/DefinitelyTyped/blob/9d88dadf44aaedcabde88053342617575a851f39/easeljs/easeljs.d.ts#L100">in</a> <a href="https://github.com/borisyankov/DefinitelyTyped/blob/52b37e40fa69c6a57b09578305827294a7c24f36/iscroll/iscroll-5.d.ts#L38">many</a> <a href="https://github.com/borisyankov/DefinitelyTyped/blob/dd35f69637817e3f7f8fb23b8d4b033885ad32cd/fancybox/fancybox.d.ts#L100">cases</a>, which removes type verification. One of the first bugs I had to deal with in TypeScript was caused by an Underscore function that returned a number or a given generic type, but the TypeScript annotation simply said that it returned the generic type (a bug that <a href="https://github.com/borisyankov/DefinitelyTyped/issues/1513">still exists</a>). This problem <a href="https://typescript.codeplex.com/workitem/1364">has been raised</a>, but there doesn&#39;t seem to be any interest from the devs, possibly because it&#39;s a feature that&#39;s alien to languages like C# and Java.</p>
+<h4 id="higher-kinded-types">Higher-kinded Types</h4>
+<p>Consider the following interfaces:</p>
+<pre><code class="lang-typescript"><span class="hljs-interface"><span class="hljs-keyword">interface</span> Orderable&lt;Coll&lt;T&gt;&gt; </span>{
+    sortBy: (comparator: (a: T, b: T) =&gt; <span class="hljs-built_in">number</span>) =&gt; Coll&lt;T&gt;;
+}
+
+<span class="hljs-interface"><span class="hljs-keyword">interface</span> Mappable&lt;Box&lt;T&gt;&gt; </span>{
+    map: <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">U</span>&gt;</span>(f: (el: T) =&gt; U) =&gt; Box<span class="hljs-tag">&lt;<span class="hljs-title">U</span>&gt;</span>;</span>
+}
+</code></pre>
+<p>(Those familiar with functors will recognize the second one, but I&#39;m calling it Mappable to keep things accessible.)</p>
+<p>These are pretty clear and useful types. They represent, respectively, collections that can be sorted to return the same kind of collection and types that contain a value that can be transformed with a function. You can then use them in less abstract types:</p>
+<pre><code class="lang-typescript"><span class="hljs-interface"><span class="hljs-keyword">interface</span> Sequence&lt;T&gt; extends Mappable&lt;Sequence&lt;T&gt;&gt; </span>{
+    first: () =&gt; T;
+    rest: () =&gt; Sequence&lt;T&gt;;
+    cons: (t: T) =&gt; Sequence&lt;T&gt;;
+    empty: () =&gt; <span class="hljs-built_in">boolean</span>;
+    <span class="hljs-comment">// Automatically derives:</span>
+    <span class="hljs-comment">// map&lt;U&gt;(f: (el: T) =&gt; U): Sequence&lt;U&gt;;</span>
+}
+
+<span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">list</span>&lt;<span class="hljs-title">T</span>&gt;<span class="hljs-params">()</span>: <span class="hljs-title">Sequence</span>&lt;<span class="hljs-title">T</span>&gt; </span>{
+    <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">cons</span><span class="hljs-params">(e: T, l: Sequence&lt;T&gt;)</span>: <span class="hljs-title">Sequence</span>&lt;<span class="hljs-title">T</span>&gt; </span>{
+        <span class="hljs-keyword">var</span> me = {
+            first: () =&gt; e,
+            rest: () =&gt; l,
+            empty: () =&gt; <span class="hljs-literal">false</span>,
+            map: <span class="xml"><span class="hljs-tag">&lt;<span class="hljs-title">U</span>&gt;</span>(f: (el: T) =&gt; U) =&gt; l.map(f).cons(f(e)),
+            cons: v =&gt; cons(v, me)
+        };
+        return me;
+    }
+
+    var empty: Sequence<span class="hljs-tag">&lt;<span class="hljs-title">T</span>&gt;</span> = {
+        first: () =&gt; null,
+        rest: () =&gt; empty,
+        map: () =&gt; empty,
+        empty: () =&gt; true,
+        cons: v =&gt; cons(v, empty)
+    };
+
+    return empty;
+}</span>
+</code></pre>
+<p>So our sequence type just extended Mappable and automatically got a definition for a map function that takes a <code>T =&gt; U</code> function and returns a <code>Sequence&lt;U&gt;</code>. This is nice for concisenesss and it enables us to write functions that can take any <code>Mappable</code> or a similar type and handle them without having to know the underlying implementation. There&#39;s just one problem: TypeScript can&#39;t do this. More specifically, it doesn&#39;t allow nested generics like <code>Mappable&lt;Box&lt;T&gt;&gt;</code>, where <code>Box</code> and <code>T</code>    aren&#39;t known by <code>Mappable</code>. Instead, we must write <code>Mappable&lt;T&gt;</code> where the type signature of <code>map&lt;U&gt;</code> is <code>(f: (t: T) =&gt; U) =&gt; Mappable&lt;U&gt;</code>. That means that something extending <code>Mappable</code> doesn&#39;t have to return the same <code>Box</code> type. For example, our sequence&#39;s map function could return a promise, an <code>Either</code>, a tree, or any other value as long as it implemented <code>Mappable</code>. Also, the expression <code>l.map(f).cons(f(e))</code> would cause a type error because TS wouldn&#39;t know that <code>l.map(f)</code> returns a sequence rather than an unspecified <code>Mappable</code>. This a violation of type safety, a failure to represent <code>map</code> generically, and, more importantly, it prevents us from encoding useful abstractions like Mappable.</p>
+<h4 id="failure-to-model-js-values">Failure to Model JS Values</h4>
+<p>In practice, TS types often can&#39;t represent JS values. There are just too many kinds of data and functions that are commonly used in JS for TS&#39;s limited type system to handle. One example is using arrays as <a href="http://msdn.microsoft.com/en-us/library/dd233200.aspx">tuples</a>, which are generally implemented in typed language as sequences with a specified number of elements, each with its own type. Again, TypeScript has no support at all, making it impossible to correctly model JS code that uses them.</p>
+<p>On the whole, you can look through the TS typings for <a href="https://github.com/borisyankov/DefinitelyTyped/blob/master/jquery/jquery.d.ts">just about any JS library</a> and tell how bad a job it does by the sheer number of <code>any</code>s in places where the actual type is well-defined but inexpressible by TS&#39;s poor type system.</p>
+<p>(If you want to see a type system with a similar goal to TypeScript that does it a lot better, look at Clojure&#39;s <a href="https://github.com/clojure/core.typed/wiki">core.typed</a>.)</p>
+<h3 id="faulty-type-system">Faulty Type System</h3>
+<p>And, despite adding a type system for correctness, TypeScript fails to eliminate what&#39;s probably the most common error that a type system could fix: <code>TypeError: &lt;thing&gt; is undefined</code>. This is because TypeScript does have one kind of union type: every type is actually a union of that type, <code>null</code>, and <code>undefined</code>. So I can write the following code:</p>
+<pre><code class="lang-typescript"><span class="hljs-keyword">var</span> x: <span class="hljs-built_in">number</span> = <span class="hljs-literal">null</span>;
+<span class="hljs-built_in">console</span>.log(x.toString());
+</code></pre>
+<p>And TypeScript won&#39;t bat an eyelid. In any real JS program, this represents a huge class of errors that will go unchecked. And it doesn&#39;t have to be this way; many modern typed languages require you to deal with nil values in a type-safe manner, as they should (Haskell, F#, Rust, OCaml, etc.). Again, this seems to be caused by the unfortunate influence of Java/C# and really reduces the practical benefit of TS.</p>
+<h3 id="annoying-type-syntax">Annoying Type Syntax</h3>
+<h4 id="functions">Functions</h4>
+<p>Function type signatures should be pretty simple, right? You just need something like <code>(number, string) =&gt; string</code>, maybe with corresponding syntax for rest and optional parameters. Well, unfortunately, TS overcomplicates this. First of all, function parameters need to be named in the type, not just in the function literal. Not only is this unusual and redundant, it often leads to devs writing things like <code>(n: number, s:string) =&gt; string</code> and creating useless noise. </p>
+<p>The other bizarreness is that there are three different ways to define a function type, but you can&#39;t always use all three, depending on context. </p>
+<pre><code><span class="hljs-attribute">map</span>: &lt;U&gt;<span class="hljs-function"><span class="hljs-params">(f: (el: T) =&gt; U)</span> =&gt;</span> Box&lt;U&gt;;
+map&lt;U&gt;<span class="hljs-function"><span class="hljs-params">(f: (el: T) =&gt; U)</span>: <span class="hljs-title">Box</span>&lt;<span class="hljs-title">U</span>&gt;;
+<span class="hljs-title">map</span>: {&lt;<span class="hljs-title">U</span>&gt;<span class="hljs-params">(f: (el: T) =&gt; U)</span>: <span class="hljs-title">Box</span>&lt;<span class="hljs-title">U</span>&gt;};</span>
+</code></pre><p>So, TypeScript function typing is far more complex than it needs to be.</p>
+<h4 id="no-type-aliases">No Type Aliases</h4>
+<p>When you&#39;re working with a structural type system, the names you give types don&#39;t actually matter, since type compatibility is determined by the structure of the types. So, if you have something like this:</p>
+<pre><code class="lang-typescript"><span class="hljs-interface"><span class="hljs-keyword">interface</span> Foo </span>{
+    a: <span class="hljs-built_in">number</span>;
+    b: <span class="hljs-built_in">string</span>;
+}
+</code></pre>
+<p>You&#39;re just declaring the name <code>Foo</code> to be equivalent to <code>{a: number; b: string;}</code>. So it would make sense to have a syntax like <code>type Foo = {a: number; b: string;};</code>. However, TypeScript went with a C#-ey interface syntax, which only allows type aliases for objects. So, there&#39;s no equivalent for these:</p>
+<pre><code class="lang-typescript">type OscillatorType = <span class="hljs-built_in">string</span>;
+type Deck = Set&lt;Card&gt;;
+type Comparator&lt;T&gt; = (a: T, b: T) =&gt; <span class="hljs-built_in">number</span>;
+</code></pre>
+<p>(Actually you can do the last one using <code>interface</code>, but the syntax is clunky and weird.)</p>
+<p>So aside from being more complex and less flexible than something like <code>type</code>, <code>interface</code> is far less intuitive. It&#39;s as if TypeScript is in denial about using structural types.</p>
+<h4 id="clunky-intersection-types">Clunky Intersection Types</h4>
+<p>A similar concept to union types are intersection types: where you specify that a value must satisfy two types. So, for example, if you have an argument to a function that must be a Thenable and a Runnable, you could ideally do something like <code>param: Thenable &amp; Runnable</code>. You can do this in TS, but it&#39;s messy because it uses interfaces (which are clearly pretty overburdened):</p>
+<pre><code class="lang-typescript"><span class="hljs-comment">// Declare intersection type</span>
+<span class="hljs-interface"><span class="hljs-keyword">interface</span> ThenableRunnable extends Thenable, Runnable </span>{}
+
+<span class="hljs-comment">// Only now can we use it</span>
+<span class="hljs-keyword">var</span> myFn : (param: ThenableRunnable) =&gt; Thenable;
+</code></pre>
+<h3 id="-classes-">&quot;Classes&quot;</h3>
+<p>The other main change that TypeScript makes is that it adds &quot;classes&quot; to JS. I&#39;m using quotes because it doesn&#39;t actually add any new semantics: a TS class is equivalent to a JS constructor. It adds some sugar to make it look Java/C#-ey, but ultimately it&#39;s still just functions and prototypical objects.</p>
+<p>First of all, classes are the last feature I think should be added to JS. When we have higher order functions, we can construct much more powerful abstractions (see SICP/HTDP for this approach) rather than taking the messy, inflexible set of additions to C-ish structs that classes are. I understand that this is an argument I wouldn&#39;t win with many people, so I&#39;m not going to go into depth, but <a href="http://raganwald.com/2014/03/31/class-hierarchies-dont-do-that.html">this post</a> explains well why JS shouldn&#39;t have classes.</p>
+<p>Secondly, this leads you into the minefield that is <code>this</code>. Rather than <code>this</code> being bound like it is in Java/C#, it&#39;s generlly determined by the object the function is called from. This works to a certain extent when using prototypical inheritance, but in practice it leads to non-composable and unpredictable functions, as well as silliness like <code>Function.prototype.call.bind(Array.prototype.slice)</code>. It&#39;s not hard to avoid <code>this</code>, but TypeScript uses it enthusiastically in classes. That&#39;s further complicated by the fact that arrow functions have lexical <code>this</code> (it&#39;s the instance of the class that they&#39;re defined in, not the object they&#39;re called on), while method-like functions and regular functions have JS&#39;s normal dynamic <code>this</code>. So this kind of messiness is a clear example of why classes don&#39;t translate well to JS.</p>
+<p>And lastly, classes complect type definitions with behaviour. I&#39;m fine with them having inferred types, but often, in TypeScript code, one ends up being pushed into using classes in order to get the types of objects being easily shared between modules. Using interfaces or inference instead in non-classical code often results in longer code for defining types and having to use arcane features like ambient modules and TS&#39;s <code>typeof</code>. You shouldn&#39;t have to use a bad construct like classes in order to get convenient cross-module object typing.</p>
+<h3 id="does-it-solve-the-problems-of-js-">Does It Solve the Problems of JS?</h3>
+<p>So the recurring theme here is that the TS developers have repeatedly chosen C#-ey approaches over more useful ones (I assume C# since it&#39;s a Microsoft effort, but they could be aiming for Java-ey too). Whether or not you think this is a good goal is a matter of opinion, but I hope I&#39;ve shown here that in practice, it integrates poorly with JS. In particular, a C#-ey type system proves to be very limited in modelling JS values and adding type safety.</p>
+<p>So, if you consider lack of type safety to be JS&#39;s largest deficiency, TypeScript isn&#39;t an adequate solution. If you want ES6 features, TypeScript isn&#39;t an adequate solution, since it only has a few of them. And if you want classes like C# (ugh), then TypeScript isn&#39;t an adequate solution, since its classes are a thin film of sugar over totally different semantics. It only really works if you want a half-assed implementation of all three.</p>
+<p>What I&#39;d like to see instead is something like <a href="http://typedclojure.org">clojure.core.typed</a> for JS. That is, something that only provides type annotation and type checking but that is designed to accomodate the way the language is written and therefore allows a far wider range of types. Not being based on a C#-ey type system would also allow the inclusion of more powerful type features such as higher-kinded types. Note that such a checker could use special comments for annotations, meaning that it could work with normal JS files. In short, a type checker that does one thing and does it well.</p>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+var disqus_shortname = 'j201'; // required: replace example with your forum shortname
+
+(function() {
+ var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+ dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+ (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+ })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+		</div>
+
+		<script type="text/javascript" src="/main.js"></script>
+
+		<!-- Disqus -->
+		<script type="text/javascript">
+		var disqus_shortname = 'j201_alex';
+
+		(function () {
+		 var s = document.createElement('script'); s.async = true;
+		 s.type = 'text/javascript';
+		 s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+		 (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+		 }());
+		</script>
+
+		<!-- GA -->
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-41719393-1', 'auto');
+		ga('send', 'pageview');
+
+		</script>
+	</body>
+</html>
