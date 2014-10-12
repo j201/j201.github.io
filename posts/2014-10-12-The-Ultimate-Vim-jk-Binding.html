@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<title>Hello, World!</title>
+		<title>The Ultimate Vim j&#x2F;k Binding</title>
 		<link href='//fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
 		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
 		<link rel="stylesheet" href="/reset.css">
@@ -48,37 +48,21 @@
 <li><a class="post-list-entry" href="/posts/2013-06-15-Hello,-World!.html">Hello, World!</a></li>
 </ul>
 		</nav><div id="content">
-			<div id="content-inner"><h1>Hello, World!</h1>
-<p>Good afternoon, Internet!</p>
-<p>So I&#39;ve figured I need a place to store neat things I find in JS and other programming tricks. Hopefully someone else can benefit from them.</p>
-<p>So, without further ado,</p>
-<pre><code class="lang-javascript"><span class="hljs-keyword">var</span> petStore = {};
-petStore.birds = {
-    <span class="hljs-string">'American Bushtit'</span> : <span class="hljs-string">'$98.99'</span>,
-    <span class="hljs-string">'Antipodean Albatross'</span> : <span class="hljs-string">'$12.49'</span>,
-    <span class="hljs-string">'Auckland Merganser'</span> : <span class="hljs-string">'$11.00'</span>,
-    <span class="hljs-string">'Barn Owl'</span> : <span class="hljs-string">'$4.97'</span>,
-    <span class="hljs-string">'Chestnut-crested Yuhina'</span> : <span class="hljs-string">'$25.00'</span>,
-    <span class="hljs-string">'Chiriqui Yellowthroat'</span> : <span class="hljs-string">'$9.99'</span>,
-    <span class="hljs-string">'Common Redpoll'</span> : <span class="hljs-string">'$5.50'</span>,
-    <span class="hljs-string">'Common Yellowthroat'</span> : <span class="hljs-string">'$8.99'</span>,
-    <span class="hljs-string">'Crested Drongo'</span> : <span class="hljs-string">'$12.50'</span>,
-    <span class="hljs-string">'Crested Quetzal'</span> : <span class="hljs-string">'$44.99'</span>,
-    <span class="hljs-string">'Dimorphic Egret'</span> : <span class="hljs-string">'$17.99'</span>,
-    <span class="hljs-string">'Doherty\'s Bushshrike'</span> : <span class="hljs-string">'$10.05'</span>,
-    <span class="hljs-string">'Dwarf Bittern'</span> : <span class="hljs-string">'$14.98'</span>,
-};
-
-<span class="hljs-built_in">console</span>.log(
-    <span class="hljs-built_in">Object</span>
-        .keys(petStore.birds)
-        .sort(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(a,b)</span> </span>{ <span class="hljs-keyword">return</span> ((-<span class="hljs-string">'Bonjour, monde!'</span>.slice.call(petStore.birds[a],<span class="hljs-number">1</span>) &lt; -<span class="hljs-string">'Morning, all!'</span>.slice.call(petStore.birds[b],<span class="hljs-number">1</span>)) &lt;&lt; <span class="hljs-number">1</span>) - <span class="hljs-number">1</span> })
-        .map(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(s)</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-string">'What\'s up, bro!'</span>.replace.apply(s,[<span class="hljs-regexp">/[^A-Z]/g</span>,<span class="hljs-string">''</span>]) })
-        .map(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(s)</span> </span>{ <span class="hljs-keyword">return</span> (<span class="hljs-string">'Howdy, y\'all!'</span>.charCodeAt.bind(s[<span class="hljs-number">0</span>])()-<span class="hljs-number">0101</span>)*<span class="hljs-number">032</span>+<span class="hljs-string">'Greetings, Earthlings!'</span>.charCodeAt.bind(s[<span class="hljs-number">1</span>])()-<span class="hljs-number">0101</span>;})
-        .map(<span class="hljs-function"><span class="hljs-keyword">function</span><span class="hljs-params">(n)</span> </span>{ <span class="hljs-keyword">return</span> <span class="hljs-string">'Salutations, Earth!'</span>.constructor.fromCharCode(n+<span class="hljs-number">0x20</span>); })
-        .join(<span class="hljs-string">'Adios, amigo'</span>.match()[<span class="hljs-number">0</span>])
-);
-</code></pre>
+			<div id="content-inner"><h1>The Ultimate Vim j&#x2F;k Binding</h1>
+<p>As a user of <code>relativenumber</code>, I get a bit more mileage out of <code>j</code> and <code>k</code> than many Vim users. It enables me to quickly see how far away I am from a line, making jumps like <code>28j</code> easy and practical. However, <code>relativenumber</code> works with lines delimited by newline characters, not the lines you see on the screen. And if a line wraps, <code>j</code> and <code>k</code> will move by text lines, not visual lines, causing awkward jumps. Because of this, may users have this in their .vimrcs:</p>
+<pre><code><span class="hljs-keyword">nnoremap</span> <span class="hljs-keyword">j</span> gj
+<span class="hljs-keyword">nnoremap</span> <span class="hljs-keyword">k</span> gk
+</code></pre><p>But, since <code>j</code> and <code>k</code> no longer act on text lines, <code>23j</code> may no longer go the the line marked <code>23</code> in the gutter. If there is a wrapped line between the cursor and the target, it will actually take multiple presses of <code>j</code> to pass that line, meaning that the cursor&#39;s end position will be too high. A good way to get around this would be to have single presses of <code>j</code> and <code>k</code> act as <code>gj</code> and <code>gk</code> while <code>j</code> and <code>k</code> with a count would act normally.</p>
+<p>The other issue that bothered me was that large <code>j</code> and <code>k</code> jumps didn&#39;t get added to the jumplist, meaning that there was no easy way to undo and redo them. That can be fixed by automatically setting the <code>&#39;</code> mark if <code>j</code> or <code>k</code> is executed with a count.</p>
+<p>So, without further ado, this is what I&#39;ve come up with:</p>
+<pre><code><span class="hljs-input"><span class="hljs-prompt">nnoremap &lt;silent&gt;</span> k <span class="hljs-symbol">:&lt;C-U&gt;execute</span> <span class="hljs-string">'normal!'</span> (<span class="hljs-symbol">v:</span>count &gt; <span class="hljs-number">1</span> ? <span class="hljs-string">"m'"</span> . <span class="hljs-symbol">v:</span>count <span class="hljs-symbol">:</span> <span class="hljs-string">'g'</span>) . <span class="hljs-string">'k'</span>&lt;<span class="hljs-constant">CR</span>&gt;
+nnoremap &lt;silent&gt; j <span class="hljs-symbol">:&lt;C-U&gt;execute</span> <span class="hljs-string">'normal!'</span> (<span class="hljs-symbol">v:</span>count &gt; <span class="hljs-number">1</span> ? <span class="hljs-string">"m'"</span> . <span class="hljs-symbol">v:</span>count <span class="hljs-symbol">:</span> <span class="hljs-string">'g'</span>) . <span class="hljs-string">'j'</span>&lt;<span class="hljs-constant">CR</span>&gt;</span>
+</code></pre><p>This does the following:</p>
+<ul>
+<li>For an <em>n</em><code>j</code> command, <code>m&#39;nj</code> is instead executed</li>
+<li>For a <code>j</code> command without a count, <code>gj</code> is instead executed</li>
+</ul>
+<p>It&#39;s not perfect - in visual mode, <code>j</code> and <code>k</code> revert to their normal definitions, but I&#39;m really enjoying its more intuitive behaviour in normal mode.</p>
 
 <div id="disqus_thread"></div>
 <script type="text/javascript">
