@@ -38,7 +38,8 @@
 		<nav id="sidebar">
 			<a href="/" id="under-title">j201's<br>Blather</a>
 			<a href="/archives.html"><h2 class="sidebar-title">Posts</h2></a>
-			<ul id="post-list"><li><a class="post-list-entry" href="/posts/2014-08-30-TypeScript-The-Bad-Parts.html">TypeScript: The Bad Parts</a></li>
+			<ul id="post-list"><li><a class="post-list-entry" href="/posts/2014-10-12-The-Ultimate-Vim-jk-Binding.html">The Ultimate Vim j&#x2F;k Binding</a></li>
+<li><a class="post-list-entry" href="/posts/2014-08-30-TypeScript-The-Bad-Parts.html">TypeScript: The Bad Parts</a></li>
 <li><a class="post-list-entry" href="/posts/2014-04-20-Expressing-Yourself.html">Expressing Yourself</a></li>
 <li><a class="post-list-entry" href="/posts/2013-09-27-Functional-List-Processing-in-JS.html">Functional List Processing in JS</a></li>
 <li><a class="post-list-entry" href="/posts/2013-08-03-Evil-JS-With-Considered-Somewhat-Useful.html">Evil JS: With Considered Somewhat Useful</a></li>
@@ -48,10 +49,32 @@
 </ul>
 		</nav><div id="content">
 			<div id="content-inner"><div class="post">
+	<h2><a href="/posts/2014-10-12-The-Ultimate-Vim-jk-Binding.html">The Ultimate Vim j&#x2F;k Binding</a></h2>
+	<br>
+	<span class="date-comments">October 12, 2014 | <a href="/posts/2014-10-12-The-Ultimate-Vim-jk-Binding.html#disqus_thread">Comments</a></span>
+	<p>As a user of <code>relativenumber</code>, I get a bit more mileage out of <code>j</code> and <code>k</code> than many Vim users. It enables me to quickly see how far away I am from a line, making jumps like <code>28j</code> easy and practical. However, <code>relativenumber</code> works with lines delimited by newline characters, not the lines you see on the screen. And if a line wraps, <code>j</code> and <code>k</code> will move by text lines, not visual lines, causing awkward jumps. Because of this, may users have this in their .vimrcs:</p>
+<pre><code><span class="hljs-keyword">nnoremap</span> <span class="hljs-keyword">j</span> gj
+<span class="hljs-keyword">nnoremap</span> <span class="hljs-keyword">k</span> gk
+</code></pre><p>But, since <code>j</code> and <code>k</code> no longer act on text lines, <code>23j</code> may no longer go the the line marked <code>23</code> in the gutter. If there is a wrapped line between the cursor and the target, it will actually take multiple presses of <code>j</code> to pass that line, meaning that the cursor&#39;s end position will be too high. A good way to get around this would be to have single presses of <code>j</code> and <code>k</code> act as <code>gj</code> and <code>gk</code> while <code>j</code> and <code>k</code> with a count would act normally.</p>
+<p>The other issue that bothered me was that large <code>j</code> and <code>k</code> jumps didn&#39;t get added to the jumplist, meaning that there was no easy way to undo and redo them. That can be fixed by automatically setting the <code>&#39;</code> mark if <code>j</code> or <code>k</code> is executed with a count.</p>
+<p>So, without further ado, this is what I&#39;ve come up with:</p>
+<pre><code><span class="hljs-input"><span class="hljs-prompt">nnoremap &lt;silent&gt;</span> k <span class="hljs-symbol">:&lt;C-U&gt;execute</span> <span class="hljs-string">'normal!'</span> (<span class="hljs-symbol">v:</span>count &gt; <span class="hljs-number">1</span> ? <span class="hljs-string">"m'"</span> . <span class="hljs-symbol">v:</span>count <span class="hljs-symbol">:</span> <span class="hljs-string">'g'</span>) . <span class="hljs-string">'k'</span>&lt;<span class="hljs-constant">CR</span>&gt;
+nnoremap &lt;silent&gt; j <span class="hljs-symbol">:&lt;C-U&gt;execute</span> <span class="hljs-string">'normal!'</span> (<span class="hljs-symbol">v:</span>count &gt; <span class="hljs-number">1</span> ? <span class="hljs-string">"m'"</span> . <span class="hljs-symbol">v:</span>count <span class="hljs-symbol">:</span> <span class="hljs-string">'g'</span>) . <span class="hljs-string">'j'</span>&lt;<span class="hljs-constant">CR</span>&gt;</span>
+</code></pre><p>This does the following:</p>
+<ul>
+<li>For an <em>n</em><code>j</code> command, <code>m&#39;nj</code> is instead executed</li>
+<li>For a <code>j</code> command without a count, <code>gj</code> is instead executed</li>
+</ul>
+<p>It&#39;s not perfect - in visual mode, <code>j</code> and <code>k</code> revert to their normal definitions, but I&#39;m really enjoying its more intuitive behaviour in normal mode.</p>
+
+	<hr>
+</div>
+<div class="post">
 	<h2><a href="/posts/2014-08-30-TypeScript-The-Bad-Parts.html">TypeScript: The Bad Parts</a></h2>
 	<br>
 	<span class="date-comments">August 30, 2014 | <a href="/posts/2014-08-30-TypeScript-The-Bad-Parts.html#disqus_thread">Comments</a></span>
-	<p><a href="http://www.typescriptlang.org/">TypeScript</a> is Microsoft&#39;s attempt to bring type checking to the Wild West of JS. It also brings features such as arrow functions and &quot;classes&quot; inspired by ES6 spec drafts. After working with it for a while, I feel it has some nice bits, but on the whole it&#39;s sorely lacking. It seems to be trying to turn JS into C# while ignoring the drawbacks and limitations of that approach. Here I&#39;d like to go through the major features of TypeScript and identify how it got them wrong.</p>
+	<p><strong>Update - Dec. 18, 2014</strong>: TypeScript <a href="http://blogs.msdn.com/b/typescript/archive/2014/11/18/what-s-new-in-the-typescript-type-system.aspx">will fixing many of these issues in v1.4.</a> That said, I&#39;m more excited now about Facebook&#39;s <a href="http://flowtype.org/">Flow type checker</a>, since it&#39;s more full-featured than TypeScript right now, even though it was just released, it seems more focused on expressive JS-oriented type checking than TypeScript, and the devs seem more engaged with the community.</p>
+<p><a href="http://www.typescriptlang.org/">TypeScript</a> is Microsoft&#39;s attempt to bring type checking to the Wild West of JS. It also brings features such as arrow functions and &quot;classes&quot; inspired by ES6 spec drafts. After working with it for a while, I feel it has some nice bits, but on the whole it&#39;s sorely lacking. It seems to be trying to turn JS into C# while ignoring the drawbacks and limitations of that approach. Here I&#39;d like to go through the major features of TypeScript and identify how it got them wrong.</p>
 <h3 id="inexpressive-types">Inexpressive Types</h3>
 <p>Despite having structural types (yay!), TS has a remarkably inflexible type system. It&#39;s lacking many powerful features that are common in modern structural type systems, which reduces its ability to model and verify programs. However, TypeScript has an even greater requirement in that it must be able to describe the types of existing JS code, which includes functions that wouldn&#39;t be allowed in many strongly typed languages. Even though this is difficult, TS falls short.</p>
 <h4 id="union-types">Union Types</h4>
