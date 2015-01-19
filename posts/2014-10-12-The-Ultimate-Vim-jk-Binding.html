@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>The Ultimate Vim j&#x2F;k Binding</title>
+		<link href='//fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+		<link href='//fonts.googleapis.com/css?family=Source+Sans+Pro' rel='stylesheet' type='text/css'>
+		<link rel="stylesheet" href="/reset.css">
+		<link rel="stylesheet" href="/solarized_light.css">
+		<link rel="stylesheet" href="/styles.css">
+		<link rel="apple-touch-icon" sizes="57x57" href="/apple-touch-icon-57x57.png">
+		<link rel="apple-touch-icon" sizes="114x114" href="/apple-touch-icon-114x114.png">
+		<link rel="apple-touch-icon" sizes="72x72" href="/apple-touch-icon-72x72.png">
+		<link rel="apple-touch-icon" sizes="144x144" href="/apple-touch-icon-144x144.png">
+		<link rel="apple-touch-icon" sizes="60x60" href="/apple-touch-icon-60x60.png">
+		<link rel="apple-touch-icon" sizes="120x120" href="/apple-touch-icon-120x120.png">
+		<link rel="apple-touch-icon" sizes="76x76" href="/apple-touch-icon-76x76.png">
+		<link rel="apple-touch-icon" sizes="152x152" href="/apple-touch-icon-152x152.png">
+		<link rel="icon" type="image/png" href="/favicon-196x196.png" sizes="196x196">
+		<link rel="icon" type="image/png" href="/favicon-160x160.png" sizes="160x160">
+		<link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96">
+		<link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16">
+		<link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32">
+		<meta name="msapplication-TileColor" content="#00aba9">
+		<meta name="msapplication-TileImage" content="/mstile-144x144.png">
+	</head>
+	<body>
+		<header>
+			<div id="title-box"><a href="/" id="over-title">j201's<br>Blather</a></div><nav>
+				<div id="top-links">
+					<a href="/archives.html">Archives</a>
+					<a href="/projects.html">Projects</a>
+					<a href="https://github.com/j201">Github</a>
+				</div>
+			</nav>
+		</header>
+		<hr id="sidebar-topper">
+		<nav id="sidebar">
+			<a href="/" id="under-title">j201's<br>Blather</a>
+			<a href="/archives.html"><h2 class="sidebar-title">Posts</h2></a>
+			<ul id="post-list"><li><a class="post-list-entry" href="/posts/2014-10-12-The-Ultimate-Vim-jk-Binding.html">The Ultimate Vim j&#x2F;k Binding</a></li>
+<li><a class="post-list-entry" href="/posts/2014-08-30-TypeScript-The-Bad-Parts.html">TypeScript: The Bad Parts</a></li>
+<li><a class="post-list-entry" href="/posts/2014-04-20-Expressing-Yourself.html">Expressing Yourself</a></li>
+<li><a class="post-list-entry" href="/posts/2013-09-27-Functional-List-Processing-in-JS.html">Functional List Processing in JS</a></li>
+<li><a class="post-list-entry" href="/posts/2013-08-03-Evil-JS-With-Considered-Somewhat-Useful.html">Evil JS: With Considered Somewhat Useful</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-22-JS-Object-Literal-Inheritance.html">JS Object Literal Inheritance</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-16-Evil-JS-Macros.html">Evil JS: Macros</a></li>
+<li><a class="post-list-entry" href="/posts/2013-06-15-Hello,-World!.html">Hello, World!</a></li>
+</ul>
+		</nav><div id="content">
+			<div id="content-inner"><h1>The Ultimate Vim j&#x2F;k Binding</h1>
+<p>As a user of <code>relativenumber</code>, I get a bit more mileage out of <code>j</code> and <code>k</code> than many Vim users. It enables me to quickly see how far away I am from a line, making jumps like <code>28j</code> easy and practical. However, <code>relativenumber</code> works with lines delimited by newline characters, not the lines you see on the screen. And if a line wraps, <code>j</code> and <code>k</code> will move by text lines, not visual lines, causing awkward jumps. Because of this, may users have this in their .vimrcs:</p>
+<pre><code><span class="hljs-keyword">nnoremap</span> <span class="hljs-keyword">j</span> gj
+<span class="hljs-keyword">nnoremap</span> <span class="hljs-keyword">k</span> gk
+</code></pre><p>But, since <code>j</code> and <code>k</code> no longer act on text lines, <code>23j</code> may no longer go the the line marked <code>23</code> in the gutter. If there is a wrapped line between the cursor and the target, it will actually take multiple presses of <code>j</code> to pass that line, meaning that the cursor&#39;s end position will be too high. A good way to get around this would be to have single presses of <code>j</code> and <code>k</code> act as <code>gj</code> and <code>gk</code> while <code>j</code> and <code>k</code> with a count would act normally.</p>
+<p>The other issue that bothered me was that large <code>j</code> and <code>k</code> jumps didn&#39;t get added to the jumplist, meaning that there was no easy way to undo and redo them. That can be fixed by automatically setting the <code>&#39;</code> mark if <code>j</code> or <code>k</code> is executed with a count.</p>
+<p>So, without further ado, this is what I&#39;ve come up with:</p>
+<pre><code><span class="hljs-input"><span class="hljs-prompt">nnoremap &lt;silent&gt;</span> k <span class="hljs-symbol">:&lt;C-U&gt;execute</span> <span class="hljs-string">'normal!'</span> (<span class="hljs-symbol">v:</span>count &gt; <span class="hljs-number">1</span> ? <span class="hljs-string">"m'"</span> . <span class="hljs-symbol">v:</span>count <span class="hljs-symbol">:</span> <span class="hljs-string">'g'</span>) . <span class="hljs-string">'k'</span>&lt;<span class="hljs-constant">CR</span>&gt;
+nnoremap &lt;silent&gt; j <span class="hljs-symbol">:&lt;C-U&gt;execute</span> <span class="hljs-string">'normal!'</span> (<span class="hljs-symbol">v:</span>count &gt; <span class="hljs-number">1</span> ? <span class="hljs-string">"m'"</span> . <span class="hljs-symbol">v:</span>count <span class="hljs-symbol">:</span> <span class="hljs-string">'g'</span>) . <span class="hljs-string">'j'</span>&lt;<span class="hljs-constant">CR</span>&gt;</span>
+</code></pre><p>This does the following:</p>
+<ul>
+<li>For an <em>n</em><code>j</code> command, <code>m&#39;nj</code> is instead executed</li>
+<li>For a <code>j</code> command without a count, <code>gj</code> is instead executed</li>
+</ul>
+<p>It&#39;s not perfect - in visual mode, <code>j</code> and <code>k</code> revert to their normal definitions, but I&#39;m really enjoying its more intuitive behaviour in normal mode.</p>
+
+<div id="disqus_thread"></div>
+<script type="text/javascript">
+var disqus_shortname = 'j201'; // required: replace example with your forum shortname
+
+(function() {
+ var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+ dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+ (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+ })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+		</div>
+
+		<script type="text/javascript" src="/main.js"></script>
+
+		<!-- Disqus -->
+		<script type="text/javascript">
+		var disqus_shortname = 'j201';
+
+		(function () {
+		 var s = document.createElement('script'); s.async = true;
+		 s.type = 'text/javascript';
+		 s.src = '//' + disqus_shortname + '.disqus.com/count.js';
+		 (document.getElementsByTagName('HEAD')[0] || document.getElementsByTagName('BODY')[0]).appendChild(s);
+		 }());
+		</script>
+
+		<!-- GA -->
+		<script>
+		(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+		(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+		m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+		})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+		ga('create', 'UA-41719393-1', 'auto');
+		ga('send', 'pageview');
+
+		</script>
+	</body>
+</html>
